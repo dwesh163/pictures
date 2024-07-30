@@ -60,7 +60,7 @@ export function UserDropdown() {
 					</Link>
 				</DropdownMenuItem>
 
-				<DropdownMenuSub>
+				{/* <DropdownMenuSub>
 					<DropdownMenuSubTrigger>
 						<SunMoon size={16} className="mr-2" />
 						Theme
@@ -84,7 +84,7 @@ export function UserDropdown() {
 							</DropdownMenuItem>
 						</DropdownMenuSubContent>
 					</DropdownMenuPortal>
-				</DropdownMenuSub>
+				</DropdownMenuSub> */}
 
 				{session != null && (
 					<>

@@ -7,9 +7,12 @@ CREATE TABLE IF NOT EXISTS users (
     provider VARCHAR(30) NOT NULL,
     name VARCHAR(150),
     password VARCHAR(255),
+    bio TEXT,
+    birthday DATE,
     createdAt DATETIME DEFAULT NOW(),
     updatedAt DATETIME DEFAULT NOW() ON UPDATE NOW(),
     verified BOOLEAN DEFAULT FALSE,
+    nameDisplay BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (userId)
 );
 
