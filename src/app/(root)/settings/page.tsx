@@ -3,12 +3,15 @@ import { Separator } from '@/components/ui/separator';
 import { ProfileForm } from './profile-form';
 import { UserProfileData } from '@/types/settings';
 import { redirect } from 'next/navigation';
+import { getInfoSession } from '@/lib/next-auth';
 
 async function fetchUserData(session: any): Promise<UserProfileData> {
+	const infoSession = await getInfoSession(session);
+
 	return {
-		username: session.user.username,
-		email: session.user.email,
-		bio: session.user.bio,
+		username: infoSession.username,
+		email: infoSession.email,
+		bio: infoSession.bio,
 	};
 }
 
@@ -20,6 +23,8 @@ export default async function SettingsProfilePage() {
 	}
 
 	const userData = await fetchUserData(session);
+
+	console.log(userData);
 
 	return (
 		<div className="space-y-6">

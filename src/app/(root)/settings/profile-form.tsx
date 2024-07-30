@@ -68,7 +68,7 @@ export function ProfileForm({ userData }: { userData: UserProfileData }) {
 						<FormItem>
 							<FormLabel>Email</FormLabel>
 							<FormControl>
-								<Input placeholder="user@example.com" {...field} />
+								<Input placeholder="user@example.com" {...field} disabled />
 							</FormControl>
 							<FormMessage />
 						</FormItem>

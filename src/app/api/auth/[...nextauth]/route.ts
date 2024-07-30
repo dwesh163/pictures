@@ -92,33 +92,17 @@ export const authOptions: AuthOptions = {
       
       const connection = await connectMySQL();
       try {
-        const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute(
-          'SELECT * FROM users WHERE email = ?',
-          [user.email]
-        );
-
-        const existingUser = rows[0];
-
-        const username = (profile as Profile & { login?: string })?.login || existingUser?.username || null;
-        const image = user.image || existingUser?.image || null;
-        const provider = account?.provider || existingUser?.provider || null;
-        const name = profile?.name || existingUser?.name || null;
+        const username = (profile as Profile & { login?: string })?.login || profile?.name || null;
+        const image = user.image || null;
+        const provider = account?.provider || null;
+        const name = (profile as Profile & { login?: string })?.login ? null : profile?.name || null;
         const verified = account?.provider === 'google' || account?.provider === 'github' ? true : false;
 
-        console.log('User:', username, image, provider, name, verified);
-        
 
-        if (existingUser) {
-          await connection.execute(
-            'UPDATE users SET username = ?, image = ?, provider = ?, name = ? WHERE email = ?',
-            [username, image, provider, name, user.email]
-          );
-        } else {
           await connection.execute(
             'INSERT INTO users (email, username, image, provider, name, verified) VALUES (?, ?, ?, ?, ?, ?)',
             [user.email, username, image, provider, name, verified]
           );
-        }
 
         return Promise.resolve(true);
       } catch (error) {
@@ -142,7 +126,7 @@ export const authOptions: AuthOptions = {
           if (existingUser) {
             const newSession: Session = {
               ...session,
-              user: { ...session.user, username: existingUser.username },
+              user: { ...session.user, username: existingUser.username, bio: existingUser.bio, birthday: existingUser.birthday, nameDisplay: existingUser.nameDisplay },
             };
             return newSession;
           }

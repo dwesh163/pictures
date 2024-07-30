@@ -3,12 +3,21 @@ import { Separator } from '@/components/ui/separator';
 import { AccountForm } from './account-form';
 import { UserAccountData } from '@/types/settings';
 import { redirect } from 'next/navigation';
+import { getInfoSession } from '@/lib/next-auth';
 
 async function fetchUserData(session: any): Promise<UserAccountData> {
+	const info = await getInfoSession(session);
+
+	console.log({
+		name: info.name,
+		birthday: info.birthday,
+		nameDisplay: info.nameDisplay,
+	});
+
 	return {
-		name: session.user.name,
-		birthday: session.user.birthday,
-		nameDisplay: session.user.nameDisplay,
+		name: info.name,
+		birthday: info.birthday,
+		nameDisplay: info.nameDisplay,
 	};
 }
 

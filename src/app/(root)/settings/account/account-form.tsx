@@ -38,7 +38,7 @@ const accountFormSchema = z.object({
 		.max(30, {
 			message: 'Name must not be longer than 30 characters.',
 		}),
-	dob: z.date({
+	birthday: z.date({
 		required_error: 'A date of birth is required.',
 	}),
 	language: z.string({
@@ -52,7 +52,7 @@ type AccountFormValues = z.infer<typeof accountFormSchema>;
 // This can come from your database or API.
 const defaultValues: Partial<AccountFormValues> = {
 	// name: "Your name",
-	// dob: new Date("2023-01-23"),
+	// birthday: new Date("2023-01-23"),
 	// nameDisplay: false,
 };
 
@@ -114,7 +114,7 @@ export function AccountForm({ userData }: { userData: UserAccountData }) {
 
 				<FormField
 					control={form.control}
-					name="dob"
+					name="birthday"
 					render={({ field }) => (
 						<FormItem className="flex flex-col">
 							<FormLabel>Date of birth</FormLabel>
