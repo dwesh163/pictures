@@ -20,8 +20,16 @@ CREATE TABLE IF NOT EXISTS users (
 CREATE TABLE IF NOT EXISTS gallery (
     galleryId INT NOT NULL UNIQUE AUTO_INCREMENT,
     userId INT NOT NULL,
+    name VARCHAR(50) NOT NULL,
+    description TEXT,
     createdAt DATETIME DEFAULT NOW(),
     updatedAt DATETIME DEFAULT NOW() ON UPDATE NOW(),
+    public BOOLEAN DEFAULT FALSE,
+    published BOOLEAN DEFAULT FALSE,
+    publicId VARCHAR(50),
+    coverImage JSON,
+    coverText VARCHAR(255),
+    coverFont VARCHAR(150),
     PRIMARY KEY (galleryId),
     FOREIGN KEY (userId) REFERENCES users (userId)
 );
@@ -29,10 +37,12 @@ CREATE TABLE IF NOT EXISTS gallery (
 -- Create table "images"
 CREATE TABLE IF NOT EXISTS images (
     imageId INT NOT NULL UNIQUE AUTO_INCREMENT,
-    imageUrl VARCHAR(255) NOT NULL,
+    imageUrl VARCHAR(255) UNIQUE NOT NULL,
     userId INT NOT NULL,
     createdAt DATETIME DEFAULT NOW(),
     updatedAt DATETIME DEFAULT NOW() ON UPDATE NOW(),
+    fileInfo JSON,
+    fileSize INT,
     PRIMARY KEY (imageId),
     FOREIGN KEY (userId) REFERENCES users (userId)
 );
