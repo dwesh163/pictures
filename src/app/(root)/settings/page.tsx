@@ -1,7 +1,7 @@
 import { getServerSession } from 'next-auth';
 import { Separator } from '@/components/ui/separator';
 import { ProfileForm } from './profile-form';
-import { UserProfileData } from '@/types/settings';
+import { UserProfileData } from '@/types/user';
 import { redirect } from 'next/navigation';
 import { getInfoSession } from '@/lib/next-auth';
 
