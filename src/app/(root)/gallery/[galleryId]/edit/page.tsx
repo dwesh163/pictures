@@ -23,6 +23,16 @@ async function fetchGallery(session: Session, galleryId: string) {
 	}
 }
 
+async function fetchUserData(session: any): Promise<UserData> {
+	const infoSession = await getInfoSession(session);
+
+	return {
+		name: infoSession.nameDisplay ? infoSession.name : infoSession.username,
+		email: infoSession.email,
+		bio: infoSession.bio,
+	};
+}
+
 export default async function GalleryEditPage({ params }: EditPageProps) {
 	const session = await getServerSession();
 
@@ -37,6 +47,7 @@ export default async function GalleryEditPage({ params }: EditPageProps) {
 	}
 
 	const gallery = await fetchGallery(session, params.galleryId);
+	const userData = await fetchUserData(session);
 
 	if (!gallery) {
 		redirect('/me');
@@ -45,7 +56,7 @@ export default async function GalleryEditPage({ params }: EditPageProps) {
 
 	return (
 		<div>
-			<EditPage galleryData={gallery} />
+			<EditPage galleryData={gallery} userData={userData} />
 		</div>
 	);
 }
