@@ -14,7 +14,7 @@ export default function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEd
 			<div className="flex items-center justify-between">
 				<div className="space-y-0.5">
 					<h2 className="md:text-2xl text-xl font-bold tracking-tight">{gallery.galleryName}</h2>
-					<p className="text-muted-foreground md:text-base text-xs">{gallery.description}</p>
+					<p className="text-muted-foreground md:text-base text-xs w-1/2">{gallery.description}</p>
 				</div>
 				{canEdit}
 				{canEdit && (
