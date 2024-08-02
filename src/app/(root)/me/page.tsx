@@ -51,7 +51,11 @@ export default async function SettingsProfilePage() {
 	}
 
 	const userData = await fetchUserData(session);
-	const galleries = await fetchGalleries(session);
+	let galleries = await fetchGalleries(session);
+
+	if (galleries == null) {
+		galleries = [];
+	}
 
 	return (
 		<div>
