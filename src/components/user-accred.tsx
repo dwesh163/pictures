@@ -99,7 +99,7 @@ export function UserAccred({ galleryId }: { galleryId: string }) {
 									</div>
 									<Popover>
 										<PopoverTrigger asChild>
-											<Button variant="outline" className="ml-auto w-32" disabled={accred[user.accreditationId]?.name === 'Creator'}>
+											<Button variant="outline" className="ml-auto w-32" disabled={user.accreditationId == 0}>
 												{accred[user.accreditationId]?.name || 'Unknown Role'}
 												<ChevronDown className="ml-2 h-4 w-4 text-muted-foreground" />
 											</Button>
@@ -117,7 +117,7 @@ export function UserAccred({ galleryId }: { galleryId: string }) {
 																	key={id}
 																	className="space-y-1 flex flex-col items-start px-4 py-2 cursor-pointer"
 																	onSelect={() => {
-																		handleRoleChange(user.userId, parseInt(id));
+																		handleRoleChange(user.userId.toString(), parseInt(id));
 																	}}>
 																	<p className="text-white">{role.name}</p>
 																	<p className="text-sm text-muted-foreground">{role.description}</p>
