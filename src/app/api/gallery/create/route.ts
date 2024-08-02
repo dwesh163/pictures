@@ -15,8 +15,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
 
 		const { name, description } = await req.json();
 
-		'Creating gallery', { name, description };
-
 		if (!name || !description || typeof name !== 'string' || typeof description !== 'string' || !name.trim() || !description.trim()) {
 			return NextResponse.json({ error: 'Title and description are required' }, { status: 400 });
 		}
@@ -30,8 +28,6 @@ export async function POST(req: NextRequest, res: NextResponse) {
 		}
 
 		const newGalleryId = await createGallery(name, description, userEmail);
-
-		'newGallery', newGalleryId;
 
 		if (!newGalleryId) {
 			return NextResponse.json({ error: 'Failed to create gallery' }, { status: 500 });
