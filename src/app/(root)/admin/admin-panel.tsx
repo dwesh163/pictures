@@ -22,7 +22,7 @@ export function AdminPanel({ adminData }: { adminData: { users: UsersData[] } })
 
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
-	const [openPopover, setOpenPopover] = useState<number | null>(null); // Manage open popover state
+	const [openPopover, setOpenPopover] = useState<number | null>(null);
 
 	const fetchUsers = useCallback(async () => {
 		setError(null);
@@ -48,7 +48,7 @@ export function AdminPanel({ adminData }: { adminData: { users: UsersData[] } })
 				});
 				if (!response.ok) throw new Error('Network response was not ok.');
 				await fetchUsers();
-				setOpenPopover(null); // Close the popover after role change
+				setOpenPopover(null);
 			} catch (error) {
 				console.error('Failed to update role:', error);
 				setError('Failed to update role.');

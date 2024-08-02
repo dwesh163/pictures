@@ -38,11 +38,10 @@ const accountFormSchema = z.object({
 
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
-// Default values mapping
 const mapUserDataToDefaultValues = (userData: UserAccountData): Partial<AccountFormValues> => ({
-	name: userData.name ?? '', // Default to empty string if undefined or null
-	birthday: userData.birthday ?? new Date(), // Default to current date if undefined or null
-	nameDisplay: userData.nameDisplay ?? false, // Default to false if undefined or null
+	name: userData.name ?? '',
+	birthday: userData.birthday ?? new Date(),
+	nameDisplay: userData.nameDisplay ?? false,
 });
 
 export function AccountForm({ userData }: { userData: UserAccountData }) {
@@ -87,9 +86,9 @@ export function AccountForm({ userData }: { userData: UserAccountData }) {
 							<div className="flex flex-row items-center space-x-1">
 								<FormControl>
 									<Checkbox
-										checked={field.value || false} // Convert to boolean
+										checked={field.value || false}
 										onCheckedChange={(checked) => {
-											field.onChange(checked); // Update the form state with the new checked value
+											field.onChange(checked);
 										}}
 									/>
 								</FormControl>

@@ -9,7 +9,7 @@ import { CheckIfUserIsVerified } from '@/lib/admin';
 async function fetchUserData(session: any): Promise<UserAccountData> {
 	const info = await getInfoSession(session);
 
-	console.log({
+	({
 		name: info.name,
 		birthday: info.birthday,
 		nameDisplay: info.nameDisplay,

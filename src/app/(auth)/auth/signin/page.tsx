@@ -1,4 +1,3 @@
-// pages/auth/signin.tsx
 'use client';
 import React, { Suspense, useEffect, useState } from 'react';
 import { signIn } from 'next-auth/react';

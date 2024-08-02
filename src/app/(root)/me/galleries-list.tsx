@@ -38,8 +38,6 @@ export function GalleriesList({ userData, galleries }: { userData: UserData; gal
 		}
 
 		try {
-			console.log('Creating gallery', { name, description });
-
 			const response = await fetch('/api/gallery/create', {
 				method: 'POST',
 				headers: {

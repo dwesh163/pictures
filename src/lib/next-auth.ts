@@ -83,8 +83,8 @@ export const authOptions: AuthOptions = {
 	},
 	callbacks: {
 		async signIn({ user, account, profile }: { user: User | AdapterUser; account: Account | null; profile?: Profile }) {
-			console.log('Sign in callback');
-			console.log(user);
+			('Sign in callback');
+			user;
 
 			const connection = await connectMySQL();
 			try {

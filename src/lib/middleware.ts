@@ -1,9 +1,7 @@
-// src/lib/middleware.ts
 import multer from 'multer';
 import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 
-// Configurer multer pour stocker les fichiers
 const storage = multer.diskStorage({
 	destination: (req, file, cb) => {
 		const uploadDir = path.join(process.env.ROOT_DIR || process.cwd(), '/uploads');

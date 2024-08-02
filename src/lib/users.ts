@@ -21,7 +21,7 @@ export async function getInfoSession(session: any): Promise<any> {
 }
 
 export async function getAccreditationId(email: string, galleryId: string): Promise<any> {
-	console.log('email:', email);
+	'email:', email;
 	const connection = await connectMySQL();
 	const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT accreditationId FROM gallery_user_accreditations WHERE userId = (SELECT userId FROM users WHERE email = ?) AND galleryId = (SELECT galleryId FROM gallery WHERE publicId = ?)', [email, galleryId]);
 

@@ -8,7 +8,7 @@ export function ShareGallery() {
 	const [email, setEmail] = useState('');
 
 	function sendInvitation() {
-		console.log(email);
+		email;
 	}
 
 	return (

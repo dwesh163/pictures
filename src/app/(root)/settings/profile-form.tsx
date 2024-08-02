@@ -21,11 +21,10 @@ const profileFormSchema = z.object({
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
-// Map UserProfileData to ProfileFormValues
 const mapUserDataToDefaultValues = (userData: UserProfileData): ProfileFormValues => ({
-	username: userData.username ?? '', // Default to empty string if undefined or null
-	email: userData.email ?? '', // Default to empty string if undefined or null
-	bio: userData.bio ?? '', // Default to empty string if undefined or null
+	username: userData.username ?? '',
+	email: userData.email ?? '',
+	bio: userData.bio ?? '',
 });
 
 export function ProfileForm({ userData }: { userData: UserProfileData }) {
@@ -36,7 +35,7 @@ export function ProfileForm({ userData }: { userData: UserProfileData }) {
 	});
 
 	function onSubmit(data: ProfileFormValues) {
-		console.log(data);
+		data;
 	}
 
 	return (

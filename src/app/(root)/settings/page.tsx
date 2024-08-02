@@ -29,7 +29,7 @@ export default async function SettingsProfilePage() {
 
 	const userData = await fetchUserData(session);
 
-	console.log(userData);
+	userData;
 
 	return (
 		<div className="space-y-6">

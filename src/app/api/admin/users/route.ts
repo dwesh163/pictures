@@ -36,7 +36,7 @@ export async function POST(req: NextRequest, { params }: { params: { galleryId: 
 		const requestBody = await req.json();
 		const { userId, verifiedId } = requestBody as { userId: number; verifiedId: number };
 
-		console.log('userId:', userId, 'verifiedId:', verifiedId);
+		'userId:', userId, 'verifiedId:', verifiedId;
 
 		if (typeof userId !== 'number' || typeof verifiedId !== 'number') {
 			return NextResponse.json({ error: 'Invalid userId or verifiedId' }, { status: 400 });

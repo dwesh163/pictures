@@ -1,5 +1,3 @@
-// types.ts
-
 export type UserProfileData = {
 	username: string | null | undefined;
 	email: string | null | undefined;

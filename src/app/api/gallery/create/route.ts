@@ -1,4 +1,3 @@
-// /app/api/gallery/route.ts (ou le chemin approprié)
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { createGallery } from '@/lib/galleries';
@@ -16,7 +15,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
 
 		const { name, description } = await req.json();
 
-		console.log('Creating gallery', { name, description });
+		'Creating gallery', { name, description };
 
 		if (!name || !description || typeof name !== 'string' || typeof description !== 'string' || !name.trim() || !description.trim()) {
 			return NextResponse.json({ error: 'Title and description are required' }, { status: 400 });
@@ -32,7 +31,7 @@ export async function POST(req: NextRequest, res: NextResponse) {
 
 		const newGalleryId = await createGallery(name, description, userEmail);
 
-		console.log('newGallery', newGalleryId);
+		'newGallery', newGalleryId;
 
 		if (!newGalleryId) {
 			return NextResponse.json({ error: 'Failed to create gallery' }, { status: 500 });

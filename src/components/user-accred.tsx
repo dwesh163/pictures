@@ -42,7 +42,7 @@ export function UserAccred({ galleryId }: { galleryId: string }) {
 
 	const handleRoleChange = useCallback(
 		async (userId: string, newRoleId: number) => {
-			console.log(`Changing role for user ${userId} to ${newRoleId}`);
+			`Changing role for user ${userId} to ${newRoleId}`;
 			setLoading(true);
 			setError(null);
 			try {
