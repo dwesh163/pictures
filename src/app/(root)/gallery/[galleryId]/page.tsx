@@ -31,7 +31,7 @@ export default async function GalleryEditPage({ params }: ViewPageProps) {
 		redirect('/auth/signin');
 	}
 
-	if (!(await CheckIfUserIsVerified(session.user.email))) {
+	if (!(await CheckIfUserIsVerified(session.user.email as string))) {
 		redirect('/verified');
 	}
 

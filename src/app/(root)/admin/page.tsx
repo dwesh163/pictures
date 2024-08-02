@@ -11,7 +11,7 @@ export default async function SettingsProfilePage() {
 		return redirect('/auth/signin');
 	}
 
-	const adminData = await getAdminData(session.user.email);
+	const adminData = await getAdminData(session.user.email as string);
 
 	if (adminData === null) {
 		return <NotFound />;
