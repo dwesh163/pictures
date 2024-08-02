@@ -7,7 +7,7 @@ import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import UploadForm from '@/components/upload-form';
-import { Dot, Plus, UserRound, Ellipsis } from 'lucide-react';
+import { Dot, Plus, UserRound, Ellipsis, Share, Pencil } from 'lucide-react';
 import { Gallery } from '@/types/gallery';
 import { cn } from '@/lib/utils';
 import { UserData } from '@/types/user';
@@ -124,14 +124,18 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 		<div className="md:space-y-6 space-y-3 p-5 pb-8 md:p-10 md:pb-16">
 			<div className="flex items-center justify-between">
 				<div className="space-y-0.5">
-					<h2 className="md:text-2xl text-xl font-bold tracking-tight">{gallery.galleryName}</h2>
-					<p className="text-muted-foreground md:text-base text-xs">{gallery.description}</p>
+					<h2 className="md:text-2xl text-xl font-bold tracking-tight flex gap-1 items-center">
+						{gallery.galleryName} <Pencil className="h-4 w-4 mt-2 md:h-5 md:w-5 md:mt-2.5" />
+					</h2>
+					<p className="text-muted-foreground md:text-base text-xs flex gap-1 items-center">
+						{gallery.description} <Pencil className="h-3 w-3 mt-1 md:w-4 md:h-4" />
+					</p>
 				</div>
 				<div className="flex items-center justify-end">
 					<Dialog open={isImportDialogOpen} onOpenChange={setIsImportDialogOpen}>
 						<DialogTrigger asChild>
 							<Button onClick={() => setIsImportDialogOpen(true)} className="mr-3">
-								<Plus className="mr-2 h-4 w-4" /> Import pictures
+								<Plus className="sm:mr-2 h-4 w-4" /> <span className="hidden sm:flex">Import pictures</span>
 							</Button>
 						</DialogTrigger>
 						<DialogContent className="w-[95%] sm:w-1/2 ">
@@ -156,9 +160,11 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 					</Dialog>
 					<Dialog>
 						<DialogTrigger asChild>
-							<Button>
-								<Plus className="mr-2 h-4 w-4" /> Share gallery
-							</Button>
+							{userData.accreditationId === 3 && (
+								<Button>
+									<Share className="sm:mr-2 h-4 w-4" /> <span className="hidden sm:flex">Share gallery</span>
+								</Button>
+							)}
 						</DialogTrigger>
 						<DialogContent className="w-[95%] sm:w-1/2 ">
 							<DialogHeader>
@@ -171,8 +177,8 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 				</div>
 			</div>
 			<div className="flex justify-between w-full">
-				<div className="w-full sm:w-1/3">
-					<form onSubmit={updateGallery}>
+				<div className="w-full lg:w-1/3">
+					{/* <form onSubmit={updateGallery}>
 						<div className="grid gap-4 py-4 mb-2">
 							<div className="grid grid-cols-4 items-center gap-4">
 								<Label htmlFor="name" className="text-right">
@@ -197,8 +203,8 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 								))}
 							</div>
 						)}
-					</form>
-					<div className={cn('flex items-center', users.length !== 0 && 'px-6 -ml-2')}>
+					</form> */}
+					<div className={cn('flex items-center w-full ', users.length !== 0 && 'pl-6 -ml-2')}>
 						{users.length !== 0 ? (
 							<>
 								{users.slice(0, 4).map((user: { name: string; image: string }, userIndex: number) => {
@@ -230,20 +236,31 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 								<UserRound className="w-5 h-5" />
 							</span>
 						)}
-						<div className="text-sm flex gap-4 items-center ">
+						<div className="text-sm w-full flex gap-4 items-center justify-between sm:justify-start">
 							<span className="-mr-1">
 								{users.length === 0 ? (
 									<div className="ml-3 font-medium">Gallery not shared</div>
 								) : (
-									<div className="ml-3 font-medium">
-										Gallery shared with {users.length} user{users.length > 1 && 's'}
-									</div>
+									<>
+										{userData.accreditationId === 3 ? (
+											<>
+												<div className="ml-3 font-medium hidden sm:flex">
+													Gallery shared with {users.length} user{users.length > 1 && 's'}
+												</div>
+												<div className="ml-3 font-medium flex sm:hidden">
+													{users.length} other{users.length > 1 && 's'}
+												</div>
+											</>
+										) : (
+											<div className="ml-3 font-medium">
+												Gallery shared with {users.length} user{users.length > 1 && 's'}
+											</div>
+										)}
+									</>
 								)}
 							</span>
 							<Dialog>
-								<DialogTrigger asChild>
-									<Button variant="outline">Manage</Button>
-								</DialogTrigger>
+								<DialogTrigger asChild>{userData.accreditationId === 3 && <Button variant="outline">Manage</Button>}</DialogTrigger>
 								<DialogContent className="w-[95%] sm:w-1/2 sm:p-6 px-3 py-6">
 									<DialogHeader>
 										<DialogTitle>People with access </DialogTitle>
