@@ -2,41 +2,36 @@
 
 import Link from 'next/link';
 import { zodResolver } from '@hookform/resolvers/zod';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { toast } from '@/components/ui/use-toast';
 import { UserProfileData } from '@/types/user';
 
 const profileFormSchema = z.object({
-	username: z
-		.string()
-		.min(2, {
-			message: 'Username must be at least 2 characters.',
-		})
-		.max(30, {
-			message: 'Username must not be longer than 30 characters.',
-		}),
-	email: z
-		.string({
-			required_error: 'Please enter an email.',
-		})
-		.email(),
+	username: z.string().min(2, { message: 'Username must be at least 2 characters.' }).max(30, { message: 'Username must not be longer than 30 characters.' }),
+	email: z.string().email({ message: 'Invalid email address.' }),
 	bio: z.string().max(160).min(4),
 });
 
 type ProfileFormValues = z.infer<typeof profileFormSchema>;
 
+// Map UserProfileData to ProfileFormValues
+const mapUserDataToDefaultValues = (userData: UserProfileData): ProfileFormValues => ({
+	username: userData.username ?? '', // Default to empty string if undefined or null
+	email: userData.email ?? '', // Default to empty string if undefined or null
+	bio: userData.bio ?? '', // Default to empty string if undefined or null
+});
+
 export function ProfileForm({ userData }: { userData: UserProfileData }) {
 	const form = useForm<ProfileFormValues>({
 		resolver: zodResolver(profileFormSchema),
-		defaultValues: userData,
+		defaultValues: mapUserDataToDefaultValues(userData),
 		mode: 'onChange',
 	});
 
