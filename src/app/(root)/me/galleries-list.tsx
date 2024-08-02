@@ -3,7 +3,7 @@ import { AwaitedReactNode, JSXElementConstructor, ReactElement, ReactNode, React
 import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { CameraOff, Dot, Eye, Lock, Plus, UserRound } from 'lucide-react';
+import { CameraOff, Dot, Eye, Lock, Plus, UserRound, Ellipsis } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -165,7 +165,7 @@ export default function GalleriesList({ userData, galleries }: { userData: UserD
 									<div className="ml-1 flex justify-between">
 										<div className={cn('flex items-center', usernames.length !== 0 && 'px-6 -ml-2')}>
 											{usernames.length !== 0 ? (
-												usernames.slice(0, 6).map((user: { name: string; image: string }, userIndex: number) => {
+												usernames.slice(0, 4).map((user: { name: string; image: string }, userIndex: number) => {
 													const { name, image } = user;
 													return (
 														<div className="flex items-center justify-center bg-background rounded-full w-12 h-12 -ml-6 z-40" key={userIndex}>
@@ -185,6 +185,13 @@ export default function GalleriesList({ userData, galleries }: { userData: UserD
 												<span className="rounded-full border shadow-sm w-10 h-10 flex items-center justify-center -ml-1">
 													<UserRound className="w-5 h-5" />
 												</span>
+											)}
+											{usernames.length > 4 && (
+												<div className="flex items-center justify-center bg-background rounded-full w-12 h-12 -ml-6 z-40">
+													<span className="rounded-full border shadow-sm flex items-center justify-center w-10 h-10 bg-muted">
+														<Ellipsis className="w-5 h-5" />
+													</span>
+												</div>
 											)}
 											<div className="text-sm">{usernames.length === 0 && <div className="ml-3 font-medium">Not shared</div>}</div>
 										</div>
