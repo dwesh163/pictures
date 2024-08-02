@@ -1,8 +1,8 @@
 // pages/auth/signin.tsx
 'use client';
+import React, { Suspense, useEffect, useState } from 'react';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useEffect, useState } from 'react';
 import { Camera, Eye, EyeOff } from 'lucide-react';
 import Link from 'next/link';
 
@@ -11,7 +11,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-export default function LoginForm() {
+function LoginForm() {
 	const router = useRouter();
 	const searchParams = useSearchParams();
 	const [email, setEmail] = useState<string>('');
@@ -24,7 +24,7 @@ export default function LoginForm() {
 	}, []);
 
 	if (!mounted) {
-		return null; // Éviter le rendu côté serveur pour ce contenu spécifique au client
+		return null;
 	}
 
 	const handleTogglePassword = () => {
@@ -111,5 +111,13 @@ export default function LoginForm() {
 				</CardContent>
 			</Card>
 		</div>
+	);
+}
+
+export default function SignInPage() {
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<LoginForm />
+		</Suspense>
 	);
 }
