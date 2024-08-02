@@ -3,15 +3,15 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { usersData } from '@/types/user';
+import { UsersData } from '@/types/user';
 import { ChevronDown, Loader2 } from 'lucide-react';
 import { useCallback, useEffect, useState } from 'react';
 import { Input } from '@/components/ui/input';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { cn } from '@/lib/utils';
 
-export function AdminPanel({ adminData }: { adminData: { users: usersData[] } }) {
-	const [users, setUsers] = useState<usersData[]>(adminData.users);
+export function AdminPanel({ adminData }: { adminData: { users: UsersData[] } }) {
+	const [users, setUsers] = useState<UsersData[]>(adminData.users);
 	const [search, setSearch] = useState<string>('');
 	const [accred, setAccred] = useState<Record<number, { name: string; description: string }>>({
 		0: { name: 'Admin', description: 'Can view, edit, manage, and delete' },
@@ -22,40 +22,36 @@ export function AdminPanel({ adminData }: { adminData: { users: usersData[] } })
 
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
+	const [openPopover, setOpenPopover] = useState<number | null>(null); // Manage open popover state
 
 	const fetchUsers = useCallback(async () => {
-		setLoading(true);
 		setError(null);
 		try {
 			const response = await fetch(`/api/admin/users`);
 			if (!response.ok) throw new Error('Network response was not ok.');
 			const data = await response.json();
-			setUsers(data);
+			setUsers(data.users);
 		} catch (error) {
 			console.error('Failed to fetch users:', error);
 			setError('Failed to fetch users.');
-		} finally {
-			setLoading(false);
 		}
 	}, []);
 
 	const handleRoleChange = useCallback(
-		async (userId: string, newRoleId: number) => {
-			setLoading(true);
+		async (userId: number, newRoleId: number) => {
 			setError(null);
 			try {
 				const response = await fetch(`/api/admin/users`, {
 					method: 'POST',
 					headers: { 'Content-Type': 'application/json' },
-					body: JSON.stringify({ userId: userId, accreditationId: newRoleId }),
+					body: JSON.stringify({ userId: userId, verifiedId: newRoleId }),
 				});
 				if (!response.ok) throw new Error('Network response was not ok.');
 				await fetchUsers();
+				setOpenPopover(null); // Close the popover after role change
 			} catch (error) {
 				console.error('Failed to update role:', error);
 				setError('Failed to update role.');
-			} finally {
-				setLoading(false);
 			}
 		},
 		[fetchUsers]
@@ -84,8 +80,8 @@ export function AdminPanel({ adminData }: { adminData: { users: usersData[] } })
 							<p className="text-red-600">{error}</p>
 						</div>
 					) : filteredUsers.length > 0 ? (
-						<ScrollArea className="h-[80vh] w-full">
-							{filteredUsers.map((user: usersData, userIndex: number) => (
+						<ScrollArea className="h-[70vh] w-full">
+							{filteredUsers.map((user: UsersData, userIndex: number) => (
 								<div key={userIndex} className="flex items-center justify-between space-x-4 sm:mt-4 mt-2">
 									<div className="sm:space-x-4 space-x-2 flex items-center">
 										<Avatar>
@@ -102,9 +98,13 @@ export function AdminPanel({ adminData }: { adminData: { users: usersData[] } })
 											<p className="text-sm text-muted-foreground truncate sm:max-w-[24rem] max-w-[8rem]">{user.email}</p>
 										</div>
 									</div>
-									<Popover>
+									<Popover
+										open={openPopover === user.userId}
+										onOpenChange={(isOpen) => {
+											if (!isOpen) setOpenPopover(null);
+										}}>
 										<PopoverTrigger asChild>
-											<Button variant="outline" className={cn('ml-auto w-42', (user.verified === 1 || user.verified === 0) && 'pointer-events-none opacity-50')}>
+											<Button variant="outline" className={cn('ml-auto w-42', (user.verified === 1 || user.verified === 0) && 'pointer-events-none opacity-50')} onClick={() => setOpenPopover(user.userId)}>
 												{accred[user.verified]?.name || 'Unknown Role'}
 												<ChevronDown className="ml-2 h-4 w-4 text-muted-foreground" />
 											</Button>
