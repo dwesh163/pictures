@@ -14,7 +14,7 @@ import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, For
 import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { toast } from '@/components/ui/use-toast';
-import { UserAccountData } from '@/types/settings';
+import { UserAccountData } from '@/types/user';
 import { Checkbox } from '@/components/ui/checkbox';
 
 const languages = [
@@ -41,10 +41,12 @@ const accountFormSchema = z.object({
 	birthday: z.date({
 		required_error: 'A date of birth is required.',
 	}),
-	language: z.string({
-		required_error: 'Please select a language.',
-	}),
-	nameDisplay: z.boolean(),
+	language: z
+		.string({
+			required_error: 'Please select a language.',
+		})
+		.optional(),
+	nameDisplay: z.number(),
 });
 
 type AccountFormValues = z.infer<typeof accountFormSchema>;
