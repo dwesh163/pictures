@@ -64,7 +64,7 @@ export function AdminPanel({ adminData }: { adminData: { users: UsersData[] } })
 			<div className="flex items-center justify-between w-full">
 				<div className="space-y-0.5 w-full">
 					<h2 className="md:text-2xl text-xl font-bold tracking-tight">User Management</h2>
-					<p className="text-muted-foreground md:text-base text-xs w-1/2">Manage user roles and permissions</p>
+					<p className="text-muted-foreground md:text-base text-xs">Manage user roles and permissions</p>
 				</div>
 			</div>
 
