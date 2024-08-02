@@ -1,5 +1,5 @@
 import { getAccreditedUsers, updateAccreditation } from '@/lib/galleries';
-import { checkAccredAccess } from '@/lib/next-auth';
+import { checkAccredAccess } from '@/lib/users';
 import { getServerSession } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
 

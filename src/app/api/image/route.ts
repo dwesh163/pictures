@@ -1,4 +1,4 @@
-import { checkImageAccess } from '@/lib/next-auth';
+import { checkImageAccess } from '@/lib/users';
 import { getServerSession } from 'next-auth';
 import { NextRequest, NextResponse } from 'next/server';
 import { readFile } from 'fs/promises';

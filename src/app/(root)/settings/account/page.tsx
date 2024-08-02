@@ -3,7 +3,7 @@ import { Separator } from '@/components/ui/separator';
 import { AccountForm } from './account-form';
 import { UserAccountData } from '@/types/user';
 import { redirect } from 'next/navigation';
-import { getInfoSession } from '@/lib/next-auth';
+import { getInfoSession } from '@/lib/users';
 
 async function fetchUserData(session: any): Promise<UserAccountData> {
 	const info = await getInfoSession(session);

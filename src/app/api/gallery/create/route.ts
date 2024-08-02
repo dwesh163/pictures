@@ -2,7 +2,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { createGallery } from '@/lib/galleries';
-import { authOptions } from '../../auth/[...nextauth]/route';
+import { authOptions } from '@/lib/next-auth';
 
 export async function POST(req: NextRequest, res: NextResponse) {
 	const session = await getServerSession({ req, res, ...authOptions });

@@ -4,8 +4,8 @@ import path from 'path';
 import { v4 as uuidv4 } from 'uuid';
 import mime from 'mime';
 import { getServerSession } from 'next-auth';
-import { authOptions } from '../../auth/[...nextauth]/route';
-import { checkIfUserIsAuthorized } from '@/lib/next-auth';
+import { authOptions } from '@/lib/next-auth';
+import { checkIfUserIsAuthorized } from '@/lib/users';
 import { saveImage } from '@/lib/galleries';
 
 const ensureDirectoryExists = async (dir: string) => {
