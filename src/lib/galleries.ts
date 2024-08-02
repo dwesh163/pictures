@@ -89,7 +89,10 @@ export async function getGallery(publicId: string, email: string): Promise<any> 
 			`
 			SELECT
 				g.galleryId,
-				g.userId,
+				CASE
+					WHEN u.nameDisplay = 1 THEN u.name
+					ELSE u.username
+				END AS userName,
 				g.name AS galleryName,
 				g.description,
 				g.createdAt,
@@ -135,6 +138,7 @@ export async function getGallery(publicId: string, email: string): Promise<any> 
 						) AS accredited_users_sub
 				) AS accredited_users
 			FROM gallery g
+					LEFT JOIN users u ON g.userId = u.userId
 			WHERE
 				g.publicId = ?
 			AND (EXISTS (
