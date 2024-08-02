@@ -94,8 +94,8 @@ export function AdminPanel({ adminData }: { adminData: { users: UsersData[] } })
 											</AvatarFallback>
 										</Avatar>
 										<div>
-											<p className="text-sm font-medium leading-none truncate">{user.name}</p>
-											<p className="text-sm text-muted-foreground truncate sm:max-w-[24rem] max-w-[8rem]">{user.email}</p>
+											<p className="text-sm font-medium leading-none truncate">{user?.name}</p>
+											<p className="text-sm text-muted-foreground truncate sm:max-w-[24rem] max-w-[8rem]">{user?.email}</p>
 										</div>
 									</div>
 									<Popover
