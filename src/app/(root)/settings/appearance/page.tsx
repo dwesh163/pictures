@@ -11,7 +11,7 @@ export default async function SettingsAppearancePage() {
 		redirect('/auth/signin');
 	}
 
-	if (!(await CheckIfUserIsVerified(session.user.email))) {
+	if (!(await CheckIfUserIsVerified(session.user.email as string))) {
 		redirect('/verified');
 	}
 

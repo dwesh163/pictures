@@ -29,7 +29,7 @@ export default async function SettingsAccountPage() {
 		redirect('/auth/signin');
 	}
 
-	if (!(await CheckIfUserIsVerified(session.user.email))) {
+	if (!(await CheckIfUserIsVerified(session.user.email as string))) {
 		redirect('/verified');
 	}
 
