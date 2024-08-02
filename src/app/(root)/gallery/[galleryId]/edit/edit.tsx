@@ -44,8 +44,6 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 		}
 
 		try {
-			'Creating gallery', { name, description };
-
 			const response = await fetch('/api/gallery/create', {
 				method: 'POST',
 				headers: {
@@ -73,7 +71,6 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 	const onGalleryUpdate = async () => {
 		const response = await fetch('/api/gallery/' + gallery.publicId);
 		const data = await response.json();
-		'Gallery data:', data;
 		if (!response.ok) {
 			console.error('Failed to fetch gallery:', data);
 		}
