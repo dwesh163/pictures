@@ -114,104 +114,106 @@ export function GalleriesList({ userData, galleries }: { userData: UserData; gal
 					</DialogContent>
 				</Dialog>
 			</div>
-			<div className="mt-5 flex flex-wrap justify-center gap-4">
-				{galleries.map((gallery: Gallery, index: number) => {
-					let usernames = [];
-					let coverImage = [];
-					let images = [];
+			{galleries.length != 0 ? (
+				<div className="mt-5 flex flex-wrap justify-center gap-4">
+					{galleries.map((gallery: Gallery, index: number) => {
+						let usernames = [];
+						let coverImage = [];
+						let images = [];
 
-					if (gallery.accredited_users) {
-						try {
-							usernames = JSON.parse('[ ' + gallery.accredited_users + ' ]');
-						} catch (e) {
-							console.error('Error parsing gallery.accredited_users:', e);
+						if (gallery.accredited_users) {
+							try {
+								usernames = JSON.parse('[ ' + gallery.accredited_users + ' ]');
+							} catch (e) {
+								console.error('Error parsing gallery.accredited_users:', e);
+							}
 						}
-					}
 
-					if (gallery.coverImage) {
-						coverImage = gallery.coverImage;
-					}
-
-					if (gallery.images) {
-						try {
-							images = JSON.parse('[ ' + gallery.images + ' ]');
-						} catch (e) {
-							console.error('Error parsing gallery.images:', e);
+						if (gallery.coverImage) {
+							coverImage = gallery.coverImage;
 						}
-					}
 
-					return (
-						<Link href={`/gallery/${gallery.publicId}/edit`} key={index} className="w-full sm:w-fit">
-							<Card className="w-full sm:w-96 lg:h-[27rem] h-[25rem] cursor-pointer">
-								{coverImage.length !== 0 && images.length !== 0 ? (
-									<div className="grid grid-cols-2 h-[254px] rounded-t-lg overflow-hidden">
-										{coverImage.map((imageId: number, imageIndex: number) => {
-											const image = images.find((img: { imageId: number }) => img.imageId === imageId);
+						if (gallery.images) {
+							try {
+								images = JSON.parse('[ ' + gallery.images + ' ]');
+							} catch (e) {
+								console.error('Error parsing gallery.images:', e);
+							}
+						}
 
-											if (!image) return null;
+						return (
+							<Link href={`/gallery/${gallery.publicId}/edit`} key={index} className="w-full sm:w-fit">
+								<Card className="w-full sm:w-96 lg:h-[27rem] h-[25rem] cursor-pointer">
+									{coverImage.length !== 0 && images.length !== 0 ? (
+										<div className="grid grid-cols-2 h-[254px] rounded-t-lg overflow-hidden">
+											{coverImage.map((imageId: number, imageIndex: number) => {
+												const image = images.find((img: { imageId: number }) => img.imageId === imageId);
 
-											return <img src={`/api/image?imageUrl=${image.imageUrl}`} alt={`Loading`} width={300} height={200} className="object-cover aspect-[3/2]" key={imageIndex} />;
-										})}
-									</div>
-								) : (
-									<div className="h-[256px] rounded-t-lg flex items-center justify-center dark:bg-zinc-900 bg-zinc-200">
-										<CameraOff />
-									</div>
-								)}
+												if (!image) return null;
 
-								<CardContent className="p-4">
-									<div className="ml-1 flex justify-between">
-										<div className={cn('flex items-center', usernames.length !== 0 && 'px-6 -ml-2')}>
-											{usernames.length !== 0 ? (
-												usernames.slice(0, 4).map((user: { name: string; image: string }, userIndex: number) => {
-													const { name, image } = user;
-													return (
-														<div className="flex items-center justify-center bg-background rounded-full w-12 h-12 -ml-6 z-40" key={userIndex}>
-															<Avatar className="border shadow-sm w-10 h-10">
-																<AvatarImage src={image} alt={name} />
-																<AvatarFallback>
-																	{name
-																		?.split(' ')
-																		.map((word) => word.charAt(0).toUpperCase())
-																		.join('')}
-																</AvatarFallback>
-															</Avatar>
-														</div>
-													);
-												})
-											) : (
-												<span className="rounded-full border shadow-sm w-10 h-10 flex items-center justify-center -ml-1">
-													<UserRound className="w-5 h-5" />
-												</span>
-											)}
-											{usernames.length > 4 && (
-												<div className="flex items-center justify-center bg-background rounded-full w-12 h-12 -ml-6 z-40">
-													<span className="rounded-full border shadow-sm flex items-center justify-center w-10 h-10 bg-muted">
-														<Ellipsis className="w-5 h-5" />
+												return <img src={`/api/image?imageUrl=${image.imageUrl}`} alt={`Loading`} width={300} height={200} className="object-cover aspect-[3/2]" key={imageIndex} />;
+											})}
+										</div>
+									) : (
+										<div className="h-[256px] rounded-t-lg flex items-center justify-center dark:bg-zinc-900 bg-zinc-200">
+											<CameraOff />
+										</div>
+									)}
+
+									<CardContent className="p-4">
+										<div className="ml-1 flex justify-between">
+											<div className={cn('flex items-center', usernames.length !== 0 && 'px-6 -ml-2')}>
+												{usernames.length !== 0 ? (
+													usernames.slice(0, 4).map((user: { name: string; image: string }, userIndex: number) => {
+														const { name, image } = user;
+														return (
+															<div className="flex items-center justify-center bg-background rounded-full w-12 h-12 -ml-6 z-40" key={userIndex}>
+																<Avatar className="border shadow-sm w-10 h-10">
+																	<AvatarImage src={image} alt={name} />
+																	<AvatarFallback>
+																		{name
+																			?.split(' ')
+																			.map((word) => word.charAt(0).toUpperCase())
+																			.join('')}
+																	</AvatarFallback>
+																</Avatar>
+															</div>
+														);
+													})
+												) : (
+													<span className="rounded-full border shadow-sm w-10 h-10 flex items-center justify-center -ml-1">
+														<UserRound className="w-5 h-5" />
 													</span>
-												</div>
-											)}
-											<div className="text-sm">{usernames.length === 0 && <div className="ml-3 font-medium">Not shared</div>}</div>
+												)}
+												{usernames.length > 4 && (
+													<div className="flex items-center justify-center bg-background rounded-full w-12 h-12 -ml-6 z-40">
+														<span className="rounded-full border shadow-sm flex items-center justify-center w-10 h-10 bg-muted">
+															<Ellipsis className="w-5 h-5" />
+														</span>
+													</div>
+												)}
+												<div className="text-sm">{usernames.length === 0 && <div className="ml-3 font-medium">Not shared</div>}</div>
+											</div>
+											<div className="text-end flex justify-end items-center">
+												<p className="text-muted-foreground flex gap-1 justify-end items-center">
+													<Lock className="w-4 h-4" />
+													<Eye className="w-4 h-4" />
+												</p>
+											</div>
 										</div>
-										<div className="text-end flex justify-end items-center">
-											<p className="text-muted-foreground flex gap-1 justify-end items-center">
-												{/* {new Date(gallery.updatedAt).toLocaleDateString('en-US', {
-                          year: 'numeric',
-                          month: 'long',
-                        })} */}
-												<Lock className="w-4 h-4" />
-												<Eye className="w-4 h-4" />
-											</p>
-										</div>
-									</div>
-									<h3 className="text-lg font-semibold truncate mt-1 -mb-1">{gallery.galleryName}</h3>
-									<p className="text-muted-foreground line-clamp-2">{gallery.description || 'No description available.'}</p>
-								</CardContent>
-							</Card>
-						</Link>
-					);
-				})}
-			</div>
+										<h3 className="text-lg font-semibold truncate mt-1 -mb-1">{gallery.galleryName}</h3>
+										<p className="text-muted-foreground line-clamp-2">{gallery.description || 'No description available.'}</p>
+									</CardContent>
+								</Card>
+							</Link>
+						);
+					})}
+				</div>
+			) : (
+				<div className="flex flex-col items-center justify-center w-full h-[75vh]">
+					<p className="text-muted-foreground">No galleries found.</p>
+				</div>
+			)}
 		</section>
 	);
 }
