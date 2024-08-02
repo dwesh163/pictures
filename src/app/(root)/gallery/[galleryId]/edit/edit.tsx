@@ -71,8 +71,9 @@ export default function EditPage({ galleryData, userData }: { galleryData: Galle
 	};
 
 	const onGalleryUpdate = async () => {
-		const response = await fetch('/api/gallery/' + gallery.galleryId);
+		const response = await fetch('/api/gallery/' + gallery.publicId);
 		const data = await response.json();
+		console.log('Gallery data:', data);
 		if (!response.ok) {
 			console.error('Failed to fetch gallery:', data);
 		}
