@@ -11,8 +11,8 @@ export default function RootLayout({ children, session }: { children: ReactNode;
 	return (
 		<SessionProvider session={session}>
 			<Header />
-			<MobileNav />
-			<main className="pt-20 lg:pt-0">{children}</main>
+			{/* <MobileNav /> */}
+			<main>{children}</main>
 		</SessionProvider>
 	);
 }
