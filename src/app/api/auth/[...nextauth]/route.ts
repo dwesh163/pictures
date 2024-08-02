@@ -1,10 +1,13 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { authHandler } from '@/lib/next-auth';
+import type { NextRequest } from 'next/server';
+import NextAuth from 'next-auth';
+import { authOptions } from '@/lib/next-auth';
 
-export async function GET(req: NextApiRequest, res: NextApiResponse) {
-	return authHandler(req, res);
+interface RouteHandlerContext {
+	params: { nextauth: string[] };
 }
 
-export async function POST(req: NextApiRequest, res: NextApiResponse) {
-	return authHandler(req, res);
+async function auth(req: NextRequest, context: RouteHandlerContext) {
+	return await NextAuth(req, context, authOptions);
 }
+
+export { auth as GET, auth as POST };
