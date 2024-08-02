@@ -57,7 +57,7 @@ export function AdminPanel({ adminData }: { adminData: { users: UsersData[] } })
 		[fetchUsers]
 	);
 
-	const filteredUsers = users.filter((user) => user.name.toLowerCase().includes(search.toLowerCase()) || user.email.toLowerCase().includes(search.toLowerCase()));
+	const filteredUsers = users.filter((user) => user?.name?.toLowerCase().includes(search.toLowerCase()) || user.email.toLowerCase().includes(search.toLowerCase()));
 
 	return (
 		<div>
@@ -88,9 +88,16 @@ export function AdminPanel({ adminData }: { adminData: { users: UsersData[] } })
 											<AvatarImage src={user.image} />
 											<AvatarFallback>
 												{user.name
-													.split(' ')
-													.map((word) => word.charAt(0).toUpperCase())
-													.join('')}
+													? user.name
+															.split(' ')
+															.map((word) => word.charAt(0).toUpperCase())
+															.join('')
+													: user.username
+													? user.username
+															.split(' ')
+															.map((word) => word.charAt(0).toUpperCase())
+															.join('')
+													: 'U'}
 											</AvatarFallback>
 										</Avatar>
 										<div>
