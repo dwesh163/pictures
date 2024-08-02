@@ -12,7 +12,10 @@ async function connectMySQL() {
 	}
 }
 
-export async function checkIfUserIsAdmin(email: string): Promise<boolean> {
+export async function checkIfUserIsAdmin(email: string | null | undefined): Promise<boolean> {
+	if (!email) {
+		return false;
+	}
 	const connection = await connectMySQL();
 	const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM admin LEFT JOIN users u on admin.userId = u.userId WHERE email = ?', [email]);
 	connection.end();
@@ -47,4 +50,10 @@ export async function CheckIfUserIsVerified(email: string): Promise<boolean> {
 	connection.end();
 
 	return rows[0].verified === 3;
+}
+
+export async function updateVerifiedId(userId: number, verifiedId: number): Promise<void> {
+	const connection = await connectMySQL();
+	await connection.execute('UPDATE users SET verified = ? WHERE userId = ?', [verifiedId, userId]);
+	connection.end();
 }
