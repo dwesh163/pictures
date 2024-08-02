@@ -8,7 +8,7 @@ export type UserProfileData = {
 
 export type UserAccountData = {
 	name: string | null | undefined;
-	birthday: string | null | undefined;
+	birthday: Date | null | undefined;
 	nameDisplay: boolean | null | undefined;
 };
 
