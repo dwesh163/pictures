@@ -1,6 +1,7 @@
 import mysql, { FieldPacket, RowDataPacket } from 'mysql2/promise';
 import { dbConfig } from '@/lib/db/config';
 import { v4 as uuidv4 } from 'uuid';
+import { AccredUser } from '@/types/user';
 
 async function connectMySQL() {
 	try {
@@ -17,6 +18,8 @@ export async function getGalleries(email: string): Promise<any> {
 	try {
 		const userId = await getId(email);
 		connection = await connectMySQL();
+		await connection.execute('SET SESSION group_concat_max_len = 100000000;');
+
 		const [galleries]: [RowDataPacket[], FieldPacket[]] = await connection.execute(
 			`
             SELECT
@@ -242,6 +245,80 @@ export async function saveImage(imageUrl: string, email: string, galleryId: stri
 		await connection.execute('INSERT INTO image_gallery (imageId, galleryId) VALUES (?, ?)', [image.imageId, galleryId]);
 	} catch (error) {
 		console.error('Error saving image:', error);
+		throw error;
+	} finally {
+		if (connection) {
+			await connection.end();
+		}
+	}
+}
+
+export async function getAccreditedUsers(galleryId: string): Promise<AccredUser[]> {
+	let connection;
+	try {
+		connection = await connectMySQL();
+		const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute(
+			`
+			SELECT
+				u.userId,
+				CASE
+					WHEN u.nameDisplay = 1 THEN u.name
+					ELSE u.username
+				END AS name,
+				u.image,
+				u.email,
+				gua.accreditationId
+			FROM users u
+				JOIN gallery_user_accreditations gua ON u.userId = gua.userId
+				LEFT JOIN gallery g ON gua.galleryId = g.galleryId
+			WHERE g.publicId = ? 
+			UNION ALL
+				SELECT  u.userId,
+						CASE
+							WHEN u.nameDisplay = 1 THEN u.name
+							ELSE u.username
+							END AS name,
+						u.image,
+						''  AS email,
+						0 AS accreditationId
+				FROM users u
+				LEFT JOIN gallery g on u.userId = g.userId
+				WHERE g.publicId = ?;
+		`,
+			[galleryId, galleryId]
+		);
+
+		return rows as AccredUser[];
+	} catch (error) {
+		console.error('Error getting accredited users:', error);
+		throw new Error(`Failed to retrieve accredited users`);
+	} finally {
+		if (connection) {
+			await connection.end();
+		}
+	}
+}
+
+export async function updateAccreditation(galleryId: string, userId: number, accreditationId: number): Promise<void> {
+	let connection;
+	try {
+		connection = await connectMySQL();
+
+		const [[user]]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM gallery_user_accreditations WHERE userId = ? AND galleryId = (SELECT galleryId FROM gallery WHERE publicId = ?)', [userId, galleryId]);
+
+		if (accreditationId === 0) {
+			return;
+		}
+
+		if (!user) {
+			throw new Error(`User not found`);
+		} else if (user.accreditationId === accreditationId) {
+			return;
+		} else {
+			await connection.execute(`UPDATE gallery_user_accreditations SET accreditationId = ? WHERE userId = ? AND galleryId = (SELECT galleryId FROM gallery WHERE publicId = ?)`, [accreditationId, userId, galleryId]);
+		}
+	} catch (error) {
+		console.error('Error updating accreditation:', error);
 		throw error;
 	} finally {
 		if (connection) {

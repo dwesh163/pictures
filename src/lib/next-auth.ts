@@ -77,6 +77,23 @@ export async function checkImageAccess(imageId: string, email: string): Promise<
 	}
 }
 
+export async function checkAccredAccess(galleryId: string, email: string): Promise<boolean> {
+	const connection = await connectMySQL();
+	const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute(
+		`
+		SELECT * FROM gallery_user_accreditations gua
+			LEFT JOIN gallery g ON gua.galleryId = g.galleryId
+		WHERE gua.galleryId = ?
+		AND (gua.userId = (SELECT userId FROM users WHERE email = ?) AND gua.accreditationId >= 3) OR g.userId = (SELECT userId FROM users WHERE email = ?);
+	`,
+		[galleryId, email, email]
+	);
+
+	connection.end();
+
+	return rows.length > 0;
+}
+
 export async function getId(email: string): Promise<any> {
 	const connection = await connectMySQL();
 	const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM users WHERE email = ?', [email]);
