@@ -1,7 +1,7 @@
 'use server';
 import { getServerSession, Session } from 'next-auth';
 import { redirect } from 'next/navigation';
-import { getInfoSession } from '@/lib/next-auth';
+import { getInfoSession } from '@/lib/users';
 import { UserData } from '@/types/user';
 import { canEditGallery, getGallery } from '@/lib/galleries';
 import { NextPageContext } from 'next';
