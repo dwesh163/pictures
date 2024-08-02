@@ -4,6 +4,7 @@ import { AccountForm } from './account-form';
 import { UserAccountData } from '@/types/user';
 import { redirect } from 'next/navigation';
 import { getInfoSession } from '@/lib/users';
+import { CheckIfUserIsVerified } from '@/lib/admin';
 
 async function fetchUserData(session: any): Promise<UserAccountData> {
 	const info = await getInfoSession(session);
@@ -26,6 +27,10 @@ export default async function SettingsAccountPage() {
 
 	if (!session) {
 		redirect('/auth/signin');
+	}
+
+	if (!(await CheckIfUserIsVerified(session.user.email))) {
+		redirect('/verified');
 	}
 
 	const userData = await fetchUserData(session);

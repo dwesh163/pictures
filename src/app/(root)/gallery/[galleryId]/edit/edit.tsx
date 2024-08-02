@@ -16,7 +16,7 @@ import { Separator } from '@/components/ui/separator';
 import { ShareGallery } from '@/components/share-gallery';
 import { UserAccred } from '@/components/user-accred';
 
-export default function EditPage({ galleryData, userData }: { galleryData: Gallery; userData: UserData }) {
+export function EditPage({ galleryData, userData }: { galleryData: Gallery; userData: UserData }) {
 	const [filesSaved, setFilesSaved] = useState<File[]>([]);
 	const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 	const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);

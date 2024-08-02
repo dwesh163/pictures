@@ -4,6 +4,7 @@ import { ProfileForm } from './profile-form';
 import { UserProfileData } from '@/types/user';
 import { redirect } from 'next/navigation';
 import { getInfoSession } from '@/lib/users';
+import { CheckIfUserIsVerified } from '@/lib/admin';
 
 async function fetchUserData(session: any): Promise<UserProfileData> {
 	const infoSession = await getInfoSession(session);
@@ -20,6 +21,10 @@ export default async function SettingsProfilePage() {
 
 	if (!session) {
 		redirect('/auth/signin');
+	}
+
+	if (!(await CheckIfUserIsVerified(session.user.email))) {
+		redirect('/verified');
 	}
 
 	const userData = await fetchUserData(session);

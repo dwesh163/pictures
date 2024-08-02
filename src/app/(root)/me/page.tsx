@@ -12,7 +12,9 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import GalleriesList from './galleries-list';
+import { GalleriesList } from './galleries-list';
+import { CheckIfUserIsVerified } from '@/lib/admin';
+
 interface Gallery {
 	accredited_users: string;
 	images: string;
@@ -42,6 +44,10 @@ export default async function SettingsProfilePage() {
 
 	if (!session) {
 		redirect('/auth/signin');
+	}
+
+	if (!(await CheckIfUserIsVerified(session.user.email))) {
+		redirect('/verified');
 	}
 
 	const userData = await fetchUserData(session);

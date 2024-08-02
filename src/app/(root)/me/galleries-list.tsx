@@ -13,7 +13,7 @@ import { Label } from '@/components/ui/label';
 import { UserData } from '@/types/user';
 import { Gallery } from '@/types/gallery';
 
-export default function GalleriesList({ userData, galleries }: { userData: UserData; galleries: Gallery[] }) {
+export function GalleriesList({ userData, galleries }: { userData: UserData; galleries: Gallery[] }) {
 	const userName = userData?.name ?? 'User';
 	const [errors, setErrors] = useState<string[]>([]);
 	const [name, setName] = useState<string>('My gallery');

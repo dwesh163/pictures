@@ -26,5 +26,14 @@ export type AccredUser = {
 	name: string;
 	email: string;
 	image: string;
-	accreditationId: number;
+	accreditationId: string;
+};
+
+export type UsersData = {
+	userId: number;
+	name: string;
+	email: string;
+	image: string;
+	username: string;
+	verified: number;
 };

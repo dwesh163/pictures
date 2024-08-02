@@ -1,7 +1,20 @@
 import { Separator } from '@/components/ui/separator';
 import { AppearanceForm } from './appearance-form';
+import { getServerSession } from 'next-auth';
+import { redirect } from 'next/navigation';
+import { CheckIfUserIsVerified } from '@/lib/admin';
 
-export default function SettingsAppearancePage() {
+export default async function SettingsAppearancePage() {
+	const session = await getServerSession();
+
+	if (!session) {
+		redirect('/auth/signin');
+	}
+
+	if (!(await CheckIfUserIsVerified(session.user.email))) {
+		redirect('/verified');
+	}
+
 	return (
 		<div className="space-y-6">
 			<div>

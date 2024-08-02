@@ -8,7 +8,7 @@ import UploadForm from '@/components/upload-form';
 import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 import Link from 'next/link';
 
-export default function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: boolean }) {
+export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: boolean }) {
 	return (
 		<div className="md:space-y-6 space-y-3 p-5 pb-8 md:p-10 md:pb-16">
 			<div className="flex items-center justify-between">
@@ -16,7 +16,6 @@ export default function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEd
 					<h2 className="md:text-2xl text-xl font-bold tracking-tight">{gallery.galleryName}</h2>
 					<p className="text-muted-foreground md:text-base text-xs w-1/2">{gallery.description}</p>
 				</div>
-				{canEdit}
 				{canEdit && (
 					<Button asChild>
 						<Link href={`/gallery/${gallery.publicId}/edit`}>

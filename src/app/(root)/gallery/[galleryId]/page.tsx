@@ -5,7 +5,8 @@ import { getInfoSession } from '@/lib/users';
 import { UserData } from '@/types/user';
 import { canEditGallery, getGallery } from '@/lib/galleries';
 import { NextPageContext } from 'next';
-import ViewPage from './viewpage';
+import { ViewPage } from './viewpage';
+import { CheckIfUserIsVerified } from '@/lib/admin';
 
 interface ViewPageProps {
 	params: {
@@ -28,6 +29,10 @@ export default async function GalleryEditPage({ params }: ViewPageProps) {
 
 	if (!session) {
 		redirect('/auth/signin');
+	}
+
+	if (!(await CheckIfUserIsVerified(session.user.email))) {
+		redirect('/verified');
 	}
 
 	if (!params.galleryId) {

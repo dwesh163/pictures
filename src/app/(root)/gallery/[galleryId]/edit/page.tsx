@@ -5,7 +5,8 @@ import { getInfoSession } from '@/lib/users';
 import { UserData } from '@/types/user';
 import { getGallery } from '@/lib/galleries';
 import { NextPageContext } from 'next';
-import EditPage from './edit';
+import { EditPage } from './edit';
+import { CheckIfUserIsVerified } from '@/lib/admin';
 
 interface EditPageProps {
 	params: {
@@ -44,6 +45,10 @@ export default async function GalleryEditPage({ params }: EditPageProps) {
 	if (!params.galleryId) {
 		redirect('/me');
 		return;
+	}
+
+	if (!(await CheckIfUserIsVerified(session.user.email))) {
+		redirect('/verified');
 	}
 
 	const gallery = await fetchGallery(session, params.galleryId);
