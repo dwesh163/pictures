@@ -1,5 +1,25 @@
+import GithubProvider from 'next-auth/providers/github';
+import GoogleProvider from 'next-auth/providers/google';
+import CredentialsProvider from 'next-auth/providers/credentials';
+import NextAuth, { Account, AuthOptions, DefaultSession, Profile, Session, User } from 'next-auth';
+import { v4 as uuidv4 } from 'uuid';
 import mysql, { FieldPacket, RowDataPacket } from 'mysql2/promise';
 import { dbConfig } from '@/lib/db/config';
+import bcrypt from 'bcrypt';
+import { NextApiRequest, NextApiResponse } from 'next';
+import { JWT } from 'next-auth/jwt';
+import { AdapterUser } from 'next-auth/adapters';
+
+interface MySQLUser {
+	userId: string;
+	name: string;
+	email: string;
+	image: string;
+	password?: string;
+	username?: string;
+	provider?: string;
+	verified?: boolean;
+}
 
 async function connectMySQL() {
 	try {
@@ -11,94 +31,107 @@ async function connectMySQL() {
 	}
 }
 
-export async function getInfoSession(session: any): Promise<any> {
-	const connection = await connectMySQL();
-	const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM users WHERE email = ?', [session.user.email]);
+export const authOptions: AuthOptions = {
+	providers: [
+		GithubProvider({
+			clientId: process.env.GITHUB_ID as string,
+			clientSecret: process.env.GITHUB_SECRET as string,
+		}),
+		GoogleProvider({
+			clientId: process.env.GOOGLE_ID as string,
+			clientSecret: process.env.GOOGLE_SECRET as string,
+		}),
+		CredentialsProvider({
+			name: 'Credentials',
+			credentials: {
+				email: { label: 'Email', type: 'email' },
+				password: { label: 'Password', type: 'password' },
+			},
+			async authorize(credentials) {
+				const connection = await connectMySQL();
+				try {
+					if (credentials) {
+						const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM users WHERE email = ?', [credentials.email]);
+						const user = rows[0] as MySQLUser;
 
-	connection.end();
+						if (user && user.password && (await bcrypt.compare(credentials.password, user.password))) {
+							return {
+								id: user.userId,
+								name: user.name,
+								username: user.username || null,
+								email: user.email,
+								image: user.image || null,
+							};
+						} else {
+							throw new Error('Invalid email or password');
+						}
+					} else {
+						throw new Error('Credentials are undefined');
+					}
+				} catch (error) {
+					console.error('Error during credentials sign-in:', error);
+					return null;
+				} finally {
+					connection.end();
+				}
+			},
+		}),
+	],
+	pages: {
+		signIn: '/auth/signin',
+		error: '/error',
+	},
+	callbacks: {
+		async signIn({ user, account, profile }: { user: User | AdapterUser; account: Account | null; profile?: Profile }) {
+			console.log('Sign in callback');
+			console.log(user);
 
-	return rows[0];
-}
+			const connection = await connectMySQL();
+			try {
+				const username = (profile as Profile & { login?: string })?.login || profile?.name?.replaceAll('|', '') || null;
+				const image = user.image || null;
+				const provider = account?.provider || null;
+				const name = (profile as Profile & { login?: string })?.login ? null : profile?.name || null;
+				const verified = account?.provider === 'google' || account?.provider === 'github' ? true : false;
 
-export async function checkIfUserIsAuthorized(galleryId: string, email: string): Promise<any> {
-	const connection = await connectMySQL();
-	const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute(
-		`
-		SELECT * FROM gallery g
-		WHERE g.galleryId = ?
-		AND (EXISTS (
-			SELECT * FROM gallery_user_accreditations gua
-			WHERE gua.galleryId = g.galleryId
-			AND gua.userId = (SELECT userId FROM users WHERE email = ?) AND gua.accreditationId >= 2
-		) OR g.userId = (SELECT userId FROM users WHERE email = ?));
-	`,
-		[galleryId, email, email]
-	);
+				const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM users WHERE email = ?', [user.email]);
 
-	connection.end();
+				if (rows.length == 0) {
+					await connection.execute('INSERT INTO users (email, username, image, provider, name, verified) VALUES (?, ?, ?, ?, ?, ?)', [user.email, username, image, provider, name, verified]);
+				}
 
-	if (!rows.length) {
-		return false;
-	} else {
-		return true;
-	}
-}
+				return Promise.resolve(true);
+			} catch (error) {
+				console.error('Error during sign-in:', error);
+				return Promise.resolve(false);
+			} finally {
+				connection.end();
+			}
+		},
 
-export async function checkImageAccess(imageId: string, email: string): Promise<boolean> {
-	let connection;
+		async session({ session, token, user }: { session: Session; token: JWT; user: AdapterUser }): Promise<Session> {
+			if (session && session.user) {
+				const connection = await connectMySQL();
+				try {
+					const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM users WHERE email = ?', [session.user.email]);
+					const existingUser = rows[0];
 
-	try {
-		connection = await connectMySQL();
+					if (existingUser) {
+						const newSession: Session = {
+							...session,
+							user: { ...session.user, username: existingUser.username, bio: existingUser.bio, birthday: existingUser.birthday, nameDisplay: existingUser.nameDisplay },
+						};
+						return newSession;
+					}
+				} catch (error) {
+					console.error('Error during session creation:', error);
+				} finally {
+					connection.end();
+				}
+			}
+			return session;
+		},
+	},
+};
 
-		const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute(
-			`
-			SELECT *
-				FROM images i
-			LEFT JOIN image_gallery ig on i.imageId = ig.imageId
-			LEFT JOIN gallery_user_accreditations gua
-				ON gua.galleryId = ig.galleryId
-				AND gua.userId = (SELECT userId FROM users WHERE email = ?)
-			LEFT JOIN users u
-				ON i.userId = u.userId
-			WHERE i.imageUrl = ?
-			AND (gua.userId IS NOT NULL OR i.userId = (SELECT userId FROM users WHERE email = ?));
-            `,
-			[email, imageId, email]
-		);
-
-		return rows.length > 0;
-	} catch (error) {
-		console.error('Error checking image access:', error);
-		throw new Error('Error checking image access');
-	} finally {
-		if (connection) {
-			await connection.end();
-		}
-	}
-}
-
-export async function checkAccredAccess(galleryId: string, email: string): Promise<boolean> {
-	const connection = await connectMySQL();
-	const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute(
-		`
-		SELECT * FROM gallery_user_accreditations gua
-			LEFT JOIN gallery g ON gua.galleryId = g.galleryId
-		WHERE gua.galleryId = ?
-		AND (gua.userId = (SELECT userId FROM users WHERE email = ?) AND gua.accreditationId >= 3) OR g.userId = (SELECT userId FROM users WHERE email = ?);
-	`,
-		[galleryId, email, email]
-	);
-
-	connection.end();
-
-	return rows.length > 0;
-}
-
-export async function getId(email: string): Promise<any> {
-	const connection = await connectMySQL();
-	const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM users WHERE email = ?', [email]);
-
-	connection.end();
-
-	return rows[0].userId;
-}
+export const authHandler = (req: NextApiRequest, res: NextApiResponse) => NextAuth(req, res, authOptions);

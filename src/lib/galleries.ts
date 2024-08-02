@@ -228,7 +228,9 @@ export async function saveImage(imageUrl: string, email: string, galleryId: stri
 
 		const [[totalSize]]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT SUM(fileSize) AS totalSize FROM images WHERE userId = (SELECT userId FROM users WHERE email = ?)', [email]);
 
-		if (totalSize.totalSize > (process.env.TOTAL_IMAGE_SIZE || 100000)) {
+		if (parseInt(totalSize.totalSize) > parseInt(String(process.env.TOTAL_IMAGE_SIZE) || '100000')) {
+			console.log(totalSize.totalSize, process.env.TOTAL_IMAGE_SIZE);
+
 			throw new Error('Total image size exceeded');
 		}
 
