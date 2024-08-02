@@ -19,6 +19,7 @@ export type UserData = {
 	name?: string | null | undefined;
 	birthday?: string | null | undefined;
 	nameDisplay?: boolean | null | undefined;
+	accreditationId?: number | null | undefined;
 };
 
 export type AccredUser = {
@@ -26,7 +27,7 @@ export type AccredUser = {
 	name: string;
 	email: string;
 	image: string;
-	accreditationId: string;
+	accreditationId: number;
 };
 
 export type UsersData = {
