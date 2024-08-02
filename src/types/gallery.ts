@@ -1,6 +1,6 @@
 export type Gallery = {
 	galleryId: number;
-	userId: number;
+	userName: string;
 	galleryName: string | undefined | null;
 	description: string | undefined | null;
 	createdAt: string | undefined | null;
