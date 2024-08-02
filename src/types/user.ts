@@ -22,6 +22,7 @@ export type UserData = {
 };
 
 export type AccredUser = {
+	userId: number;
 	name: string;
 	email: string;
 	image: string;
