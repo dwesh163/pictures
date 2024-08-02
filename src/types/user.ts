@@ -20,3 +20,10 @@ export type UserData = {
 	birthday?: string | null | undefined;
 	nameDisplay?: boolean | null | undefined;
 };
+
+export type AccredUser = {
+	name: string;
+	email: string;
+	image: string;
+	accreditationId: number;
+};

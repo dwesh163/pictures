@@ -7,7 +7,7 @@ export type Gallery = {
 	updatedAt: string | undefined | null;
 	public: boolean | undefined | null;
 	published: boolean | undefined | null;
-	publicId: string | undefined | null;
+	publicId: string;
 	coverText: string | undefined | null;
 	coverFont: string | undefined | null;
 	images: { userId: number; imageId: number; imageUrl: string }[] | null;
