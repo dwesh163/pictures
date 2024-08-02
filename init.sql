@@ -11,7 +11,7 @@ CREATE TABLE IF NOT EXISTS users (
     birthday DATE,
     createdAt DATETIME DEFAULT NOW(),
     updatedAt DATETIME DEFAULT NOW() ON UPDATE NOW(),
-    verified BOOLEAN DEFAULT FALSE,
+    verified INT DEFAULT 0,
     nameDisplay BOOLEAN DEFAULT FALSE,
     PRIMARY KEY (userId)
 );
@@ -76,4 +76,10 @@ CREATE TABLE IF NOT EXISTS image_gallery (
     PRIMARY KEY (imageId, galleryId),
     FOREIGN KEY (imageId) REFERENCES images (imageId),
     FOREIGN KEY (galleryId) REFERENCES gallery (galleryId)
+);
+
+CREATE TABLE IF NOT EXISTS admin (
+    adminId INT NOT NULL UNIQUE AUTO_INCREMENT,
+    userId INT NOT NULL,
+    PRIMARY KEY (adminId)
 );
