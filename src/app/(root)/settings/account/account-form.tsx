@@ -30,38 +30,25 @@ const languages = [
 ] as const;
 
 const accountFormSchema = z.object({
-	name: z
-		.string()
-		.min(2, {
-			message: 'Name must be at least 2 characters.',
-		})
-		.max(30, {
-			message: 'Name must not be longer than 30 characters.',
-		}),
-	birthday: z.date({
-		required_error: 'A date of birth is required.',
-	}),
-	language: z
-		.string({
-			required_error: 'Please select a language.',
-		})
-		.optional(),
-	nameDisplay: z.number(),
+	name: z.string().min(2, { message: 'Name must be at least 2 characters.' }).max(30, { message: 'Name must not be longer than 30 characters.' }).optional(),
+	birthday: z.date({ required_error: 'A date of birth is required.' }),
+	language: z.string().optional(),
+	nameDisplay: z.boolean().optional(),
 });
 
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
-// This can come from your database or API.
-const defaultValues: Partial<AccountFormValues> = {
-	// name: "Your name",
-	// birthday: new Date("2023-01-23"),
-	// nameDisplay: false,
-};
+// Default values mapping
+const mapUserDataToDefaultValues = (userData: UserAccountData): Partial<AccountFormValues> => ({
+	name: userData.name ?? '', // Default to empty string if undefined or null
+	birthday: userData.birthday ?? new Date(), // Default to current date if undefined or null
+	nameDisplay: userData.nameDisplay ?? false, // Default to false if undefined or null
+});
 
 export function AccountForm({ userData }: { userData: UserAccountData }) {
 	const form = useForm<AccountFormValues>({
 		resolver: zodResolver(accountFormSchema),
-		defaultValues: userData,
+		defaultValues: mapUserDataToDefaultValues(userData),
 	});
 
 	function onSubmit(data: AccountFormValues) {
@@ -100,7 +87,7 @@ export function AccountForm({ userData }: { userData: UserAccountData }) {
 							<div className="flex flex-row items-center space-x-1">
 								<FormControl>
 									<Checkbox
-										checked={field.value}
+										checked={field.value || false} // Convert to boolean
 										onCheckedChange={(checked) => {
 											field.onChange(checked); // Update the form state with the new checked value
 										}}
@@ -161,7 +148,7 @@ export function AccountForm({ userData }: { userData: UserAccountData }) {
 											<CommandGroup>
 												{languages.map((language) => (
 													<CommandItem
-														value={language.label}
+														value={language.value}
 														key={language.value}
 														onSelect={() => {
 															form.setValue('language', language.value);
