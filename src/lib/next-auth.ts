@@ -96,8 +96,14 @@ export const authOptions: AuthOptions = {
 
 				const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM users WHERE email = ?', [user.email]);
 
+				if (rows.length != 0 || account?.provider != rows[0].provider) {
+					return Promise.resolve(false);
+				}
+
 				if (rows.length == 0) {
 					await connection.execute('INSERT INTO users (email, username, image, provider, name, verified) VALUES (?, ?, ?, ?, ?, ?)', [user.email, username, image, provider, name, verified]);
+				} else {
+					await connection.execute('UPDATE users SET image = ? WHERE email = ?', [image]);
 				}
 
 				return Promise.resolve(true);
