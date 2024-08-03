@@ -43,7 +43,9 @@ export async function POST(req: NextRequest, { params }: { params: { galleryId: 
 		const requestBody = await req.json();
 		const { userId, accreditationId } = requestBody as { userId: number; accreditationId: number };
 
-		if (typeof userId !== 'number' || typeof accreditationId !== 'number') {
+		console.log('userId:', userId, 'accreditationId:', accreditationId);
+
+		if (typeof userId !== 'number' || typeof accreditationId !== 'number' || userId < 1 || accreditationId <= 1) {
 			return NextResponse.json({ error: 'Invalid userId or accreditationId' }, { status: 400 });
 		}
 
