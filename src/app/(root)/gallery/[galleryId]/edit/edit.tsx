@@ -20,6 +20,7 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 	const [filesSaved, setFilesSaved] = useState<File[]>([]);
 	const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 	const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
+	const [isSharetDialogOpen, setIsSharetDialogOpen] = useState(false);
 	const [gallery, setGallery] = useState<Gallery>(galleryData);
 
 	const [errors, setErrors] = useState<string[]>([]);
@@ -155,20 +156,20 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 							</DialogFooter>
 						</DialogContent>
 					</Dialog>
-					<Dialog>
+					<Dialog open={isSharetDialogOpen} onOpenChange={setIsSharetDialogOpen}>
 						<DialogTrigger asChild>
 							{userData.accreditationId === 3 && (
 								<Button>
-									<Share className="sm:mr-2 h-4 w-4" /> <span className="hidden sm:flex">Share gallery</span>
+									<Share className="sm:mr-2 h-4 w-4" /> <span className="hidden sm:flex">Share access</span>
 								</Button>
 							)}
 						</DialogTrigger>
 						<DialogContent className="w-[95%] sm:w-1/2 ">
 							<DialogHeader>
 								<DialogTitle>Share this gallery</DialogTitle>
-								<DialogDescription>Anyone with the join the gallery as a viewer.</DialogDescription>
+								<DialogDescription> Invite people to collaborate on this gallery by entering their email addresses.</DialogDescription>
 							</DialogHeader>
-							<ShareGallery />
+							<ShareGallery galleryId={gallery?.publicId?.toString()} setIsSharetDialogOpen={setIsSharetDialogOpen} />
 						</DialogContent>
 					</Dialog>
 				</div>
@@ -273,17 +274,19 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 
 			<Separator />
 
-			<div className="-ml-2 w-[calc(100%+1rem)]">
-				<ResponsiveMasonry columnsCountBreakPoints={{ 350: 2, 750: 4, 900: 5 }}>
-					<Masonry>
-						{gallery?.images?.map((image, key) => (
-							<div key={'image' + key} className="p-2">
-								<img src={'/api/image/?imageUrl=' + image.imageUrl} alt={'image'} />
-							</div>
-						))}
-					</Masonry>
-				</ResponsiveMasonry>
-			</div>
+			{gallery?.images?.length != 0 && (
+				<div className="-ml-2 w-[calc(100%+1rem)]">
+					<ResponsiveMasonry columnsCountBreakPoints={{ 350: 2, 750: 4, 900: 5 }}>
+						<Masonry>
+							{gallery?.images?.map((image, key) => (
+								<div key={'image' + key} className="p-2">
+									<img src={'/api/image/?imageUrl=' + image.imageUrl} alt={'image'} />
+								</div>
+							))}
+						</Masonry>
+					</ResponsiveMasonry>
+				</div>
+			)}
 		</div>
 	);
 }
