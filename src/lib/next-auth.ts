@@ -9,6 +9,9 @@ import bcrypt from 'bcrypt';
 import { NextApiRequest, NextApiResponse } from 'next';
 import { JWT } from 'next-auth/jwt';
 import { AdapterUser } from 'next-auth/adapters';
+import { sendEmail } from './mail';
+import path from 'path';
+import fs from 'fs';
 
 interface MySQLUser {
 	userId: string;
@@ -54,7 +57,11 @@ export const authOptions: AuthOptions = {
 						const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM users WHERE email = ?', [credentials.email]);
 						const user = rows[0] as MySQLUser;
 
+						console.log('User:', user);
+
 						if (user && user.password && (await bcrypt.compare(credentials.password, user.password))) {
+							console.log('User:', user);
+
 							return {
 								id: user.userId,
 								name: user.name,
@@ -82,9 +89,8 @@ export const authOptions: AuthOptions = {
 		error: '/error',
 	},
 	callbacks: {
-		async signIn({ user, account, profile }: { user: User | AdapterUser; account: Account | null; profile?: Profile }) {
-			('Sign in callback');
-			user;
+		async signIn({ user, account, profile }: { user: User | AdapterUser; account: Account | null; profile?: Profile | null | undefined }) {
+			console.log('Sign-in callback');
 
 			const connection = await connectMySQL();
 			try {
@@ -96,15 +102,30 @@ export const authOptions: AuthOptions = {
 
 				const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM users WHERE email = ?', [user.email]);
 
-				if (rows.length != 0 || account?.provider != rows[0].provider) {
-					return Promise.resolve(false);
+				if (rows[0].provider != 'credentials') {
+					if (rows.length != 0 || account?.provider != rows[0].provider) {
+						return Promise.resolve(false);
+					}
+
+					if (rows.length == 0) {
+						await connection.execute('INSERT INTO users (email, username, image, provider, name, verified) VALUES (?, ?, ?, ?, ?, ?)', [user.email, username, image, provider, name, verified]);
+					} else {
+						await connection.execute('UPDATE users SET image = ? WHERE email = ?', [image]);
+					}
 				}
 
-				if (rows.length == 0) {
-					await connection.execute('INSERT INTO users (email, username, image, provider, name, verified) VALUES (?, ?, ?, ?, ?, ?)', [user.email, username, image, provider, name, verified]);
-				} else {
-					await connection.execute('UPDATE users SET image = ? WHERE email = ?', [image]);
+				const [[adminRows]]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM admin LEFT JOIN users u on admin.userId = u.userId');
+
+				let htmlContent = '';
+				try {
+					const filePath = path.join(process.cwd(), 'mail/otp.html');
+					htmlContent = fs.readFileSync(filePath, 'utf-8');
+					htmlContent = htmlContent.replaceAll('XXXXXXNEWXXXXXX', 'A new user has joined your gallery\n--------------------------\n\nName: ' + name + '\nEmail: ' + user.email + '\n\n--------------------------\n\nKooked');
+				} catch (error) {
+					console.error('Error reading HTML file:', error);
 				}
+
+				await sendEmail(adminRows.email, 'New user <contact@kooked.ch>', 'New user', htmlContent);
 
 				return Promise.resolve(true);
 			} catch (error) {
@@ -116,17 +137,26 @@ export const authOptions: AuthOptions = {
 		},
 
 		async session({ session, token, user }: { session: Session; token: JWT; user: AdapterUser }): Promise<Session> {
+			console.log('Session callback');
+
 			if (session && session.user) {
+				console.log('Session:', session);
+
 				const connection = await connectMySQL();
 				try {
 					const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM users WHERE email = ?', [session.user.email]);
 					const existingUser = rows[0];
+
+					console.log('Existing user:', existingUser);
 
 					if (existingUser) {
 						const newSession: Session = {
 							...session,
 							user: { ...session.user, username: existingUser.username, bio: existingUser.bio, birthday: existingUser.birthday, nameDisplay: existingUser.nameDisplay },
 						};
+
+						console.log('New session:', newSession);
+
 						return newSession;
 					}
 				} catch (error) {

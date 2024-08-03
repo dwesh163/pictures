@@ -24,9 +24,21 @@ export async function getAccreditationId(email: string, galleryId: string): Prom
 	const connection = await connectMySQL();
 	const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT accreditationId FROM gallery_user_accreditations WHERE userId = (SELECT userId FROM users WHERE email = ?) AND galleryId = (SELECT galleryId FROM gallery WHERE publicId = ?)', [email, galleryId]);
 
+	const [rows2]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM gallery WHERE userId = (SELECT userId FROM users WHERE email = ?) AND galleryId = (SELECT galleryId FROM gallery WHERE publicId = ?)', [email, galleryId]);
+
 	connection.end();
 
-	return rows[0].accreditationId;
+	if (rows.length === 0 && rows2.length === 0) {
+		return 0;
+	}
+
+	if (rows.length === 0 && rows2.length === 1) {
+		return 3;
+	}
+
+	if (rows.length === 1) {
+		return rows[0].accreditationId;
+	}
 }
 
 export async function checkIfUserIsAuthorized(galleryId: string, email: string): Promise<any> {
@@ -91,12 +103,18 @@ export async function checkAccredAccess(galleryId: string, email: string): Promi
 
 	const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute(
 		`
-		SELECT * FROM gallery_user_accreditations gua
-			LEFT JOIN gallery g ON gua.galleryId = g.galleryId
-		WHERE gua.galleryId = (SELECT galleryId FROM gallery WHERE publicId = ?)
-		AND (gua.userId = (SELECT userId FROM users WHERE email = ?) AND gua.accreditationId = 3) OR g.userId = (SELECT userId FROM users WHERE email = ?);
+		SELECT
+			CASE
+				WHEN g.userId = (SELECT userId FROM users WHERE email = ?) THEN true
+				WHEN a.accreditationId IS NOT NULL AND a.accreditationId = 5 THEN true
+				ELSE false
+				END AS accessStatus
+		FROM gallery g
+				LEFT JOIN gallery_user_accreditations a
+						ON g.galleryId = a.galleryId AND a.userId = (SELECT userId FROM users WHERE email = ?)
+		WHERE g.galleryId = (SELECT galleryId FROM gallery WHERE publicId = ?);
 	`,
-		[galleryId, email, email]
+		[email, email, galleryId]
 	);
 
 	connection.end();

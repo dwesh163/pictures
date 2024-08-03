@@ -90,9 +90,9 @@ export async function getGallery(publicId: string, email: string): Promise<any> 
 			SELECT
 				g.galleryId,
 				CASE
-					WHEN u.nameDisplay = 1 THEN u.name
+					WHEN u.nameDisplay = 1 OR u.username IS NULL THEN u.name
 					ELSE u.username
-				END AS userName,
+				END AS name,
 				g.name AS galleryName,
 				g.description,
 				g.createdAt,
@@ -117,8 +117,8 @@ export async function getGallery(publicId: string, email: string): Promise<any> 
 				(
 					SELECT GROUP_CONCAT(
 								JSON_OBJECT(
-										'name', CASE
-													WHEN accredited_users_sub.nameDisplay = 1 THEN accredited_users_sub.name
+										'name',   CASE
+													WHEN accredited_users_sub.nameDisplay = 1 OR accredited_users_sub.username IS NULL  THEN accredited_users_sub.name
 													ELSE accredited_users_sub.username
 									END, 'image', accredited_users_sub.image, 'email', accredited_users_sub.email, 'accreditationId', accredited_users_sub.accreditationId
 								)
@@ -156,9 +156,11 @@ export async function getGallery(publicId: string, email: string): Promise<any> 
 		}
 
 		const gallery = galleries.map((gallery) => {
+			console.log(gallery.images);
+
 			return {
 				...gallery,
-				images: JSON.parse(`[ ${gallery.images} ]`),
+				images: gallery.images != null ? JSON.parse(`[ ${gallery.images} ]`) : [],
 				accredited_users: JSON.parse(`[ ${gallery.accredited_users} ]`),
 			};
 		})[0];
@@ -268,7 +270,7 @@ export async function getAccreditedUsers(galleryId: string): Promise<AccredUser[
 			SELECT
 				u.userId,
 				CASE
-					WHEN u.nameDisplay = 1 THEN u.name
+					WHEN u.nameDisplay = 1 OR u.username IS NULL THEN u.name
 					ELSE u.username
 				END AS name,
 				u.image,
@@ -281,9 +283,9 @@ export async function getAccreditedUsers(galleryId: string): Promise<AccredUser[
 			UNION ALL
 				SELECT  u.userId,
 						CASE
-							WHEN u.nameDisplay = 1 THEN u.name
+							WHEN u.nameDisplay = 1 OR u.username IS NULL THEN u.name
 							ELSE u.username
-							END AS name,
+						END AS name,
 						u.image,
 						''  AS email,
 						0 AS accreditationId
@@ -318,7 +320,7 @@ export async function updateAccreditation(galleryId: string, userId: number, acc
 
 		if (!user) {
 			throw new Error(`User not found`);
-		} else if (user.accreditationId === accreditationId) {
+		} else if (user.accreditationId === accreditationId || user.accreditationId === 1) {
 			return;
 		} else {
 			await connection.execute(`UPDATE gallery_user_accreditations SET accreditationId = ? WHERE userId = ? AND galleryId = (SELECT galleryId FROM gallery WHERE publicId = ?)`, [accreditationId, userId, galleryId]);
@@ -346,6 +348,41 @@ export async function getId(email: string): Promise<any> {
 		return rows[0].userId;
 	} catch (error) {
 		console.error('Error getting user ID:', error);
+		throw error;
+	} finally {
+		if (connection) {
+			await connection.end();
+		}
+	}
+}
+
+export async function getJoinInfo(token: string): Promise<any> {
+	let connection;
+	try {
+		connection = await connectMySQL();
+
+		const [[request]]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM join_gallery_requests WHERE token = ?', [token]);
+
+		const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute(
+			`SELECT 
+				g.name as galleryName, 
+				CASE 
+					WHEN u.nameDisplay = 1 OR u.username IS NULL THEN u.name 
+					ELSE u.username 
+				END AS name,
+				u.phoneNum
+			FROM gallery g 
+			LEFT JOIN users u ON g.userId = u.userId 
+			WHERE g.galleryId = ?`,
+			[request.galleryId]
+		);
+
+		if (rows.length === 0) {
+			throw new Error('Gallery not found');
+		}
+		return rows[0];
+	} catch (error) {
+		console.error('Error getting join info:', error);
 		throw error;
 	} finally {
 		if (connection) {
