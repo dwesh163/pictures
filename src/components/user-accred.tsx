@@ -13,9 +13,11 @@ export function UserAccred({ galleryId }: { galleryId: string }) {
 	const [search, setSearch] = useState<string>('');
 	const [accred, setAccred] = useState<Record<number, { name: string; description: string }>>({
 		0: { name: 'Creator', description: 'Can view, edit, manage, and delete' },
-		1: { name: 'Viewer', description: 'Can view' },
-		2: { name: 'Editor', description: 'Can view and edit' },
-		3: { name: 'Owner', description: 'Can view, edit, and manage' },
+		1: { name: 'invited', description: 'invited to gallery' },
+		2: { name: 'waiting', description: 'waiting for approval' },
+		3: { name: 'Viewer', description: 'Can view' },
+		4: { name: 'Editor', description: 'Can view and edit' },
+		5: { name: 'Owner', description: 'Can view, edit, and manage' },
 	});
 	const [loading, setLoading] = useState<boolean>(false);
 	const [error, setError] = useState<string | null>(null);
@@ -41,7 +43,7 @@ export function UserAccred({ galleryId }: { galleryId: string }) {
 	}, [fetchUsers]);
 
 	const handleRoleChange = useCallback(
-		async (userId: string, newRoleId: number) => {
+		async (userId: number, newRoleId: number) => {
 			`Changing role for user ${userId} to ${newRoleId}`;
 			setLoading(true);
 			setError(null);
@@ -99,7 +101,7 @@ export function UserAccred({ galleryId }: { galleryId: string }) {
 									</div>
 									<Popover>
 										<PopoverTrigger asChild>
-											<Button variant="outline" className="ml-auto w-32" disabled={user.accreditationId == 0}>
+											<Button variant="outline" className="ml-auto w-32" disabled={user.accreditationId <= 1}>
 												{accred[user.accreditationId]?.name || 'Unknown Role'}
 												<ChevronDown className="ml-2 h-4 w-4 text-muted-foreground" />
 											</Button>
@@ -111,13 +113,13 @@ export function UserAccred({ galleryId }: { galleryId: string }) {
 													<CommandEmpty>No roles found.</CommandEmpty>
 													<CommandGroup>
 														{Object.entries(accred)
-															.slice(1, 4)
+															.slice(2, Object.keys(accred).length)
 															.map(([id, role]) => (
 																<CommandItem
 																	key={id}
 																	className="space-y-1 flex flex-col items-start px-4 py-2 cursor-pointer"
 																	onSelect={() => {
-																		handleRoleChange(user.userId.toString(), parseInt(id));
+																		handleRoleChange(user.userId, parseInt(id));
 																	}}>
 																	<p className="text-white">{role.name}</p>
 																	<p className="text-sm text-muted-foreground">{role.description}</p>
