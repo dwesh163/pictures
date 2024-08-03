@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255),
     bio TEXT,
     birthday DATE,
+    phoneNum VARCHAR(15),
     createdAt DATETIME DEFAULT NOW(),
     updatedAt DATETIME DEFAULT NOW() ON UPDATE NOW(),
     verified INT DEFAULT 0,
@@ -51,6 +52,7 @@ CREATE TABLE IF NOT EXISTS images (
 CREATE TABLE IF NOT EXISTS accreditations (
     accreditationId INT NOT NULL UNIQUE AUTO_INCREMENT,
     name VARCHAR(50) NOT NULL,
+    description TEXT,
     PRIMARY KEY (accreditationId)
 );
 
@@ -83,3 +85,61 @@ CREATE TABLE IF NOT EXISTS admin (
     userId INT NOT NULL,
     PRIMARY KEY (adminId)
 );
+
+CREATE TABLE IF NOT EXISTS otp (
+    otpId VARCHAR(36) NOT NULL UNIQUE,
+    userId INT NOT NULL,
+    otp VARCHAR(6) NOT NULL,
+    createdAt DATETIME DEFAULT NOW(),
+    sendCount INT DEFAULT 0,
+    sendAt DATETIME DEFAULT NOW(),
+    PRIMARY KEY (otpId),
+    FOREIGN KEY (userId) REFERENCES users (userId)
+);
+
+CREATE TABLE IF NOT EXISTS join_gallery_requests (
+    requestId INT NOT NULL UNIQUE AUTO_INCREMENT,
+    galleryId INT NOT NULL,
+    email VARCHAR(255) NOT NULL,
+    userId INT,
+    createdAt DATETIME DEFAULT NOW(),
+    code VARCHAR(6) NOT NULL,
+    codeTryCount INT DEFAULT 0,
+    phoneNum VARCHAR(15),
+    token VARCHAR(128) UNIQUE NOT NULL,
+    FOREIGN KEY (galleryId) REFERENCES gallery (galleryId),
+    FOREIGN KEY (userId) REFERENCES users (userId)
+);
+
+insert into
+    pictures_db.accreditations (
+        accreditationId,
+        name,
+        description
+    )
+values (
+        1,
+        'Creator',
+        'Can view, edit, manage, and delete'
+    ),
+    (
+        2,
+        'invited',
+        'invited to gallery'
+    ),
+    (
+        3,
+        'waiting',
+        'waiting for approval'
+    ),
+    (4, 'Viewer', 'Can view'),
+    (
+        5,
+        'Editor',
+        'Can view and edit'
+    ),
+    (
+        6,
+        'Owner',
+        'Can view, edit, and manage'
+    );
