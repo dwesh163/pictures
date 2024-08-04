@@ -40,7 +40,7 @@ type AccountFormValues = z.infer<typeof accountFormSchema>;
 
 const mapUserDataToDefaultValues = (userData: UserAccountData): Partial<AccountFormValues> => ({
 	name: userData.name ?? '',
-	birthday: userData.birthday ?? new Date(),
+	birthday: userData.birthday ?? undefined,
 	nameDisplay: userData.nameDisplay ?? false,
 });
 
@@ -116,7 +116,7 @@ export function AccountForm({ userData }: { userData: UserAccountData }) {
 									</FormControl>
 								</PopoverTrigger>
 								<PopoverContent className="w-auto p-0" align="start">
-									<Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date > new Date() || date < new Date('1900-01-01')} initialFocus />
+									<Calendar mode="single" selected={field.value} onSelect={field.onChange} disabled={(date) => date > new Date() || date < new Date('1900-01-01')} />
 								</PopoverContent>
 							</Popover>
 							<FormDescription>Your date of birth is used to calculate your age.</FormDescription>
