@@ -158,7 +158,7 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 					</Dialog>
 					<Dialog open={isSharetDialogOpen} onOpenChange={setIsSharetDialogOpen}>
 						<DialogTrigger asChild>
-							{userData.accreditationId === 3 && (
+							{userData.accreditationId === 5 && (
 								<Button>
 									<Share className="sm:mr-2 h-4 w-4" /> <span className="hidden sm:flex">Share access</span>
 								</Button>
@@ -258,7 +258,7 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 								)}
 							</span>
 							<Dialog>
-								<DialogTrigger asChild>{userData.accreditationId === 3 && <Button variant="outline">Manage</Button>}</DialogTrigger>
+								<DialogTrigger asChild>{userData.accreditationId === 5 && <Button variant="outline">Manage</Button>}</DialogTrigger>
 								<DialogContent className="w-[95%] sm:w-1/2 sm:p-6 px-3 py-6">
 									<DialogHeader>
 										<DialogTitle>People with access </DialogTitle>
