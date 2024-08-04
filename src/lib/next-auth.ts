@@ -103,7 +103,7 @@ export const authOptions: AuthOptions = {
 				const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM users WHERE email = ?', [user.email]);
 
 				if (rows[0].provider != 'credentials') {
-					if (rows.length != 0 || account?.provider != rows[0].provider) {
+					if (rows.length != 0 && account?.provider != rows[0].provider) {
 						return Promise.resolve(false);
 					}
 
