@@ -24,9 +24,9 @@ interface MySQLUser {
 	verified?: boolean;
 }
 
-async function connectMySQL() {
+async function connectMySQL(): Promise<mysql.Connection> {
 	try {
-		const connection = await mysql.createConnection(dbConfig);
+		const connection: mysql.Connection = await mysql.createConnection(dbConfig);
 		return connection;
 	} catch (error) {
 		console.error('Error connecting to MySQL:', error);
@@ -102,17 +102,17 @@ export const authOptions: AuthOptions = {
 
 				const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM users WHERE email = ?', [user.email]);
 
-				if (rows[0].provider != 'credentials') {
-					if (rows[0]?.provider && account?.provider) {
-						if (rows.length != 0 && account?.provider != rows[0]?.provider) {
-							return Promise.resolve(false);
+				if (rows.length == 0) {
+					await connection.execute('INSERT INTO users (email, username, image, provider, name, verified) VALUES (?, ?, ?, ?, ?, ?)', [user.email, username, image, provider, name, verified]);
+				} else {
+					if (rows[0].provider != 'credentials') {
+						if (rows[0]?.provider && account?.provider) {
+							if (rows.length != 0 && account?.provider != rows[0]?.provider) {
+								return Promise.resolve(false);
+							} else {
+								await connection.execute('UPDATE users SET image = ? WHERE email = ?', [image]);
+							}
 						}
-					}
-
-					if (rows.length == 0) {
-						await connection.execute('INSERT INTO users (email, username, image, provider, name, verified) VALUES (?, ?, ?, ?, ?, ?)', [user.email, username, image, provider, name, verified]);
-					} else {
-						await connection.execute('UPDATE users SET image = ? WHERE email = ?', [image]);
 					}
 				}
 
