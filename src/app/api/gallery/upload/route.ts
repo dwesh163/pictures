@@ -73,6 +73,7 @@ export async function POST(req: Request, res: Response) {
 				await fs.writeFile(filePath, buffer);
 				return filePath;
 			} catch (err) {
+				console.error('Error saving file:', err);
 				return null;
 			}
 		});
