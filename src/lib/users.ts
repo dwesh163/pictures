@@ -33,7 +33,7 @@ export async function getAccreditationId(email: string, galleryId: string): Prom
 	}
 
 	if (rows.length === 0 && rows2.length === 1) {
-		return 3;
+		return 5;
 	}
 
 	if (rows.length === 1) {
