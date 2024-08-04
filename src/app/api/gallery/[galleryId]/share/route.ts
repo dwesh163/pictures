@@ -105,7 +105,7 @@ export async function POST(req: NextRequest, { params }: PageProps) {
 			isUnique = (existingTokenRows as any[])[0].count === 0;
 		}
 
-		await connection.execute('INSERT INTO join_gallery_requests (galleryId, email, userId, phoneNum, code, token) VALUES ((SELECT galleryId FROM gallery WHERE publicId = ?), ?, (SELECT userId FROM users WHERE email = ?), ?, ?, ?)', [params.galleryId, email, session.user.email, phoneNumber.replace('+', ''), code, uniqueToken]);
+		await connection.execute('INSERT INTO join_gallery_requests (galleryId, email, userId, phoneNumber, code, token) VALUES ((SELECT galleryId FROM gallery WHERE publicId = ?), ?, (SELECT userId FROM users WHERE email = ?), ?, ?, ?)', [params.galleryId, email, session.user.email, phoneNumber.replace('+', ''), code, uniqueToken]);
 
 		let htmlContent: string;
 		try {
