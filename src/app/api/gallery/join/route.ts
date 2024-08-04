@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
 
 	try {
 		const requestBody = await req.json();
-		const { phoneNum, userCode, token } = requestBody as { phoneNum: string; userCode: string; token: string };
+		const { phoneNumber, userCode, token } = requestBody as { phoneNumber: string; userCode: string; token: string };
 
 		if (!userCode || !token) {
 			return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
@@ -53,8 +53,8 @@ export async function POST(req: NextRequest) {
 			return NextResponse.json({ error: 'User not found' }, { status: 400 });
 		}
 
-		if (phoneNum && isValidPhoneNumber(phoneNum)) {
-			await connection.execute('UPDATE users SET phoneNum = ? WHERE email = ?', [phoneNum.replace('+', ''), session.user.email]);
+		if (phoneNumber && isValidPhoneNumber(phoneNumber)) {
+			await connection.execute('UPDATE users SET phoneNumber = ? WHERE email = ?', [phoneNumber.replace('+', ''), session.user.email]);
 		}
 
 		const [[request]]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM join_gallery_requests WHERE token = ?', [token]);
