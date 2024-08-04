@@ -95,7 +95,7 @@ export async function getGallery(publicId: string, email: string): Promise<any> 
 				CASE
 					WHEN u.nameDisplay = 1 OR u.username IS NULL THEN u.name
 					ELSE u.username
-				END AS name,
+				END AS userName,
 				g.name AS galleryName,
 				g.description,
 				g.createdAt,
@@ -385,7 +385,7 @@ export async function getJoinInfo(token: string): Promise<any> {
 					WHEN u.nameDisplay = 1 OR u.username IS NULL THEN u.name 
 					ELSE u.username 
 				END AS name,
-				u.phoneNum
+				u.phoneNumber
 			FROM gallery g 
 			LEFT JOIN users u ON g.userId = u.userId 
 			WHERE g.galleryId = ?`,
