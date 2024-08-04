@@ -10,7 +10,7 @@ const inter = Inter({ subsets: ['latin'] });
 const APP_NAME = 'Pictures';
 const APP_DEFAULT_TITLE = 'Pictures';
 const APP_TITLE_TEMPLATE = '%s - Pictures';
-const APP_DESCRIPTION = 'A music player for everyone';
+const APP_DESCRIPTION = 'Share your photos with friends and family';
 
 export const metadata: Metadata = {
 	applicationName: APP_NAME,
