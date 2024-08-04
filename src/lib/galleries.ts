@@ -2,6 +2,9 @@ import mysql, { FieldPacket, RowDataPacket } from 'mysql2/promise';
 import { dbConfig } from '@/lib/db/config';
 import { v4 as uuidv4 } from 'uuid';
 import { AccredUser } from '@/types/user';
+import { sendEmail } from './mail';
+import path from 'path';
+import fs from 'fs';
 
 async function connectMySQL() {
 	try {
@@ -323,6 +326,18 @@ export async function updateAccreditation(galleryId: string, userId: number, acc
 		} else if (user.accreditationId === accreditationId || user.accreditationId === 1) {
 			return;
 		} else {
+			if (user.accreditationId === 2 && accreditationId >= 3) {
+				let htmlContent = '';
+				try {
+					const filePath = path.join(process.cwd(), 'mail/welcome.html');
+					htmlContent = fs.readFileSync(filePath, 'utf-8');
+					htmlContent = htmlContent.replaceAll('XXXXXXLINKXXXXXX', process.env.NEXTAUTH_URL + '/' + galleryId);
+				} catch (error) {
+					console.error('Error reading HTML file:', error);
+				}
+
+				await sendEmail(user.email, 'Welcome to your new gallery <contact@kooked.ch>', 'Welcome to your new gallery', htmlContent);
+			}
 			await connection.execute(`UPDATE gallery_user_accreditations SET accreditationId = ? WHERE userId = ? AND galleryId = (SELECT galleryId FROM gallery WHERE publicId = ?)`, [accreditationId, userId, galleryId]);
 		}
 	} catch (error) {
