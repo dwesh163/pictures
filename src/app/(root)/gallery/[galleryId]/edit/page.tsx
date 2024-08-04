@@ -53,6 +53,10 @@ export default async function GalleryEditPage({ params }: EditPageProps) {
 	const gallery = await fetchGallery(session, params.galleryId);
 	const userData = await fetchUserData(session, params.galleryId);
 
+	if (userData.accreditationId != 5) {
+		redirect('/me');
+	}
+
 	if (!gallery) {
 		redirect('/me');
 	}
