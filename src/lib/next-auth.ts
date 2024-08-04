@@ -112,7 +112,7 @@ export const authOptions: AuthOptions = {
 					}
 				}
 
-				const [[adminRows]]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM admin LEFT JOIN users u on admin.userId = u.userId');
+				const [adminRows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM admin LEFT JOIN users u on admin.userId = u.userId');
 
 				let htmlContent = '';
 				try {
@@ -124,7 +124,7 @@ export const authOptions: AuthOptions = {
 				}
 
 				if (adminRows.length != 0) {
-					await sendEmail(adminRows.email, 'New user <contact@kooked.ch>', 'New user', htmlContent);
+					await sendEmail(adminRows[0].email, 'New user <contact@kooked.ch>', 'New user', htmlContent);
 				}
 
 				return Promise.resolve(true);
