@@ -12,7 +12,7 @@ export default function InputPage({ hasPhoneNum, creator, name }: { hasPhoneNum:
 	const searchParams = useSearchParams();
 
 	const [code, setCode] = useState('');
-	const [phoneNum, setPhoneNum] = useState('');
+	const [phoneNumber, setPhoneNumber] = useState('');
 	const [error, setError] = useState('');
 
 	const router = useRouter();
@@ -21,7 +21,7 @@ export default function InputPage({ hasPhoneNum, creator, name }: { hasPhoneNum:
 		const response = await fetch(`/api/gallery/join`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },
-			body: JSON.stringify({ phoneNum, userCode: code, token: searchParams.get('token') }),
+			body: JSON.stringify({ phoneNumber, userCode: code, token: searchParams.get('token') }),
 		});
 		const data = await response.json();
 		if (data.success) {
@@ -44,7 +44,7 @@ export default function InputPage({ hasPhoneNum, creator, name }: { hasPhoneNum:
 				</CardHeader>
 				<CardContent className="flex space-y-4 items-center justify-center flex-col sm:px-6 px-3">
 					<Input value={code} onChange={(e) => setCode(e.target.value)} placeholder="XXXXXX" className="mt-1" />
-					{!hasPhoneNum && <PhoneInput className="w-full" value={phoneNum} onChange={setPhoneNum} international={false} defaultCountry="CH" placeholder="Enter a phone number" />}
+					{!hasPhoneNum && <PhoneInput className="w-full" value={phoneNumber} onChange={setPhoneNumber} international={false} defaultCountry="CH" placeholder="Enter a phone number" />}
 					{error && <p className="text-red-500">{error}</p>}
 					<Button className="mt-8 w-full" onClick={() => joinGallery()}>
 						Join
