@@ -9,6 +9,7 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye, EyeOff, Camera } from 'lucide-react';
 import Link from 'next/link';
+import { PhoneInput } from '@/components/phone-input';
 
 interface StepOneProps {
 	name: string;
@@ -19,13 +20,15 @@ interface StepOneProps {
 	setUsername: (value: string) => void;
 	email: string;
 	setEmail: (value: string) => void;
+	phoneNumber: string;
+	setPhoneNumber: (value: string) => void;
 	password: string;
 	setPassword: (value: string) => void;
 	showPassword: boolean;
 	handleTogglePassword: () => void;
 }
 
-function StepOne({ name, setName, lastname, setLastname, username, setUsername, email, setEmail, password, setPassword, showPassword, handleTogglePassword }: StepOneProps) {
+function StepOne({ name, setName, lastname, setLastname, username, setUsername, phoneNumber, setPhoneNumber, email, setEmail, password, setPassword, showPassword, handleTogglePassword }: StepOneProps) {
 	return (
 		<>
 			<div className="w-full flex justify-between gap-2">
@@ -46,6 +49,13 @@ function StepOne({ name, setName, lastname, setLastname, username, setUsername, 
 				<Label className="mb-2">Username</Label>
 				<Input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className="w-full" placeholder="Username" required />
 			</div>
+			<div className="sm:mb-4 mb-3">
+				<Label className="mb-2" htmlFor="phoneNumber">
+					Phone Number
+				</Label>
+				<PhoneInput id="phoneNumber" value={phoneNumber} onChange={setPhoneNumber} className="w-full" international={false} defaultCountry="CH" required placeholder="XXX XXX XX XX" />
+			</div>
+
 			<div className="sm:mb-4 mb-3">
 				<Label className="mb-2" htmlFor="email">
 					Email
@@ -136,6 +146,7 @@ function Signup() {
 	const [name, setName] = useState('');
 	const [lastname, setLastname] = useState('');
 	const [username, setUsername] = useState('');
+	const [phoneNumber, setPhoneNumber] = useState('');
 	const [email, setEmail] = useState('');
 	const [password, setPassword] = useState('');
 	const [showPassword, setShowPassword] = useState(false);
@@ -164,20 +175,32 @@ function Signup() {
 
 	const handleSubmit = async (event: FormEvent) => {
 		event.preventDefault();
+
+		if (name.trim() === '' || lastname.trim() === '' || username.trim() === '' || phoneNumber.trim() === '' || email.trim() === '' || password.trim() === '') {
+			setError('Missing field');
+			return;
+		}
+
+		if (!phoneNumber.startsWith('0')) {
+			setError('Invalid phone number');
+			return;
+		}
+
 		try {
 			const response = await fetch('/api/auth/signup', {
 				method: 'POST',
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ name, lastname, username, email, password }),
+				body: JSON.stringify({ name, lastname, username, phoneNumber, email, password }),
 			});
 			const data = await response.json();
 			if (data.otpId) {
 				setOtpId(data.otpId);
+				setError('');
 				handleNextStep();
 			} else {
-				setError('Failed to get OTP ID');
+				setError(data.error ?? 'Failed to get OTP');
 			}
 		} catch (error) {
 			setError('An error occurred');
@@ -248,7 +271,7 @@ function Signup() {
 					<CardContent className="pt-0 sm:px-6 px-3">
 						{step === 1 && (
 							<form onSubmit={handleSubmit}>
-								<StepOne name={name} setName={setName} lastname={lastname} setLastname={setLastname} username={username} setUsername={setUsername} email={email} setEmail={setEmail} password={password} setPassword={setPassword} showPassword={showPassword} handleTogglePassword={handleTogglePassword} />
+								<StepOne name={name} setName={setName} lastname={lastname} setLastname={setLastname} username={username} setUsername={setUsername} phoneNumber={phoneNumber} setPhoneNumber={setPhoneNumber} email={email} setEmail={setEmail} password={password} setPassword={setPassword} showPassword={showPassword} handleTogglePassword={handleTogglePassword} />
 								<Button type="submit" className="mt-6 w-full">
 									Next
 								</Button>
