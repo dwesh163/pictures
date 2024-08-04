@@ -23,5 +23,5 @@ export default async function JoinPage({ searchParams }: { searchParams: { token
 
 	const joinInfo = await getJoinInfo(searchParams.token);
 
-	return <Input hasPhoneNum={joinInfo.phoneNum != null} creator={joinInfo.name} name={joinInfo.galleryName} />;
+	return <Input hasPhoneNum={joinInfo.phoneNumber != null} creator={joinInfo.name} name={joinInfo.galleryName} />;
 }
