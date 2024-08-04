@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Camera, CircleCheckBig } from 'lucide-react';
 import Link from 'next/link';
+import { Suspense } from 'react';
 
-export default function Success() {
+function Success() {
 	const searchParams = useSearchParams();
 	const callbackUrl = searchParams.get('callbackUrl');
 
@@ -26,5 +27,13 @@ export default function Success() {
 				</CardContent>
 			</Card>
 		</div>
+	);
+}
+
+export default function SuccessPage() {
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<Success />
+		</Suspense>
 	);
 }

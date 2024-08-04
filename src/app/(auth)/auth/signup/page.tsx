@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useEffect, FormEvent } from 'react';
+import React, { useState, useEffect, FormEvent, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Head from 'next/head';
 import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp';
@@ -25,43 +25,45 @@ interface StepOneProps {
 	handleTogglePassword: () => void;
 }
 
-const StepOne: React.FC<StepOneProps> = ({ name, setName, lastname, setLastname, username, setUsername, email, setEmail, password, setPassword, showPassword, handleTogglePassword }) => (
-	<>
-		<div className="w-full flex justify-between gap-2">
-			<div className="sm:mb-4 mb-3">
-				<Label className="mb-2" htmlFor="name">
-					Name
-				</Label>
-				<Input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} className="w-full" placeholder="Your name" required />
+function StepOne({ name, setName, lastname, setLastname, username, setUsername, email, setEmail, password, setPassword, showPassword, handleTogglePassword }: StepOneProps) {
+	return (
+		<>
+			<div className="w-full flex justify-between gap-2">
+				<div className="sm:mb-4 mb-3">
+					<Label className="mb-2" htmlFor="name">
+						Name
+					</Label>
+					<Input type="text" id="name" value={name} onChange={(e) => setName(e.target.value)} className="w-full" placeholder="Your name" required />
+				</div>
+				<div className="sm:mb-4 mb-3">
+					<Label className="mb-2" htmlFor="lastname">
+						Last name
+					</Label>
+					<Input type="text" id="lastname" value={lastname} onChange={(e) => setLastname(e.target.value)} className="w-full" placeholder="Your lastname" required />
+				</div>
 			</div>
 			<div className="sm:mb-4 mb-3">
-				<Label className="mb-2" htmlFor="lastname">
-					Last name
-				</Label>
-				<Input type="text" id="lastname" value={lastname} onChange={(e) => setLastname(e.target.value)} className="w-full" placeholder="Your lastname" required />
+				<Label className="mb-2">Username</Label>
+				<Input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className="w-full" placeholder="Username" required />
 			</div>
-		</div>
-		<div className="sm:mb-4 mb-3">
-			<Label className="mb-2">Username</Label>
-			<Input type="text" value={username} onChange={(e) => setUsername(e.target.value)} className="w-full" placeholder="Username" required />
-		</div>
-		<div className="sm:mb-4 mb-3">
-			<Label className="mb-2" htmlFor="email">
-				Email
-			</Label>
-			<Input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full" placeholder="name@example.com" required />
-		</div>
-		<div className="sm:mb-4 mb-3 relative">
-			<Label className="mb-2" htmlFor="password">
-				Password
-			</Label>
-			<Input type={showPassword ? 'text' : 'password'} id="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full" placeholder="••••••••" required />
-			<button type="button" onClick={handleTogglePassword} className="absolute inset-y-0 h-10 sm:mt-[2.125rem] mt-[1.29rem] right-0 pr-3 flex items-center text-gray-500">
-				{showPassword ? <EyeOff /> : <Eye />}
-			</button>
-		</div>
-	</>
-);
+			<div className="sm:mb-4 mb-3">
+				<Label className="mb-2" htmlFor="email">
+					Email
+				</Label>
+				<Input type="email" id="email" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full" placeholder="name@example.com" required />
+			</div>
+			<div className="sm:mb-4 mb-3 relative">
+				<Label className="mb-2" htmlFor="password">
+					Password
+				</Label>
+				<Input type={showPassword ? 'text' : 'password'} id="password" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full" placeholder="••••••••" required />
+				<button type="button" onClick={handleTogglePassword} className="absolute inset-y-0 h-10 sm:mt-[2.125rem] mt-[1.29rem] right-0 pr-3 flex items-center text-gray-500">
+					{showPassword ? <EyeOff /> : <Eye />}
+				</button>
+			</div>
+		</>
+	);
+}
 
 interface StepOTPProps {
 	otp: string;
@@ -74,7 +76,7 @@ interface StepOTPProps {
 	countdown: number;
 }
 
-const StepOTP: React.FC<StepOTPProps> = ({ otp, setOtp, email, summitOtp, resendOtp, error, setError, countdown }) => {
+function StepOTP({ otp, setOtp, email, summitOtp, resendOtp, error, setError, countdown }: StepOTPProps) {
 	return (
 		<div className="w-full">
 			<header className="mb-8 text-center sm:text-left">
@@ -113,21 +115,23 @@ const StepOTP: React.FC<StepOTPProps> = ({ otp, setOtp, email, summitOtp, resend
 			</div>
 		</div>
 	);
-};
+}
 
-const StepSuccess: React.FC = () => (
-	<div className="flex flex-col items-center justify-center mt-8">
-		<h2 className="sm:text-2xl text-xl font-bold text-gray-800 mt-4">Signup Successful!</h2>
-		<p className="text-gray-600 mt-2">
-			You have successfully signed up. You can now{' '}
-			<a href="/auth/signin" className="text-blue-600 hover:underline">
-				Sign in
-			</a>
-		</p>
-	</div>
-);
+function StepSuccess() {
+	return (
+		<div className="flex flex-col items-center justify-center mt-8">
+			<h2 className="sm:text-2xl text-xl font-bold text-gray-800 mt-4">Signup Successful!</h2>
+			<p className="text-gray-600 mt-2">
+				You have successfully signed up. You can now{' '}
+				<a href="/auth/signin" className="text-blue-600 hover:underline">
+					Sign in
+				</a>
+			</p>
+		</div>
+	);
+}
 
-const Signup: React.FC = () => {
+function Signup() {
 	const [step, setStep] = useState(1);
 	const [name, setName] = useState('');
 	const [lastname, setLastname] = useState('');
@@ -230,32 +234,40 @@ const Signup: React.FC = () => {
 	};
 
 	return (
-		<div className="flex items-center justify-center w-full sm:h-screen flex-col sm:p-5 p-2 py-5 mt-12 sm:mt-0">
-			<Link href="/" className="flex gap-2 justify-center items-center mb-8 mt-8">
-				<Camera className="w-8 h-8" />
-				<h1 className="text-3xl font-black">Pictures</h1>
-			</Link>
-			<Card className="w-full sm:w-1/2 xl:w-1/4 sm:mx-5 border-0 sm:border">
-				<CardHeader className={(step === 2 ? 'pb-0 sm:px-6 px-3' : 'sm:px-6 px-3') || undefined}>
-					<CardTitle className="font-semibold tracking-tight text-2xl sm:text-left text-center">Signup</CardTitle>
-					{step !== 2 && <CardDescription className="text-sm text-muted-foreground">Enter your details below to sign up</CardDescription>}
-				</CardHeader>
-				<CardContent className="pt-0 sm:px-6 px-3">
-					{step === 1 && (
-						<form onSubmit={handleSubmit}>
-							<StepOne name={name} setName={setName} lastname={lastname} setLastname={setLastname} username={username} setUsername={setUsername} email={email} setEmail={setEmail} password={password} setPassword={setPassword} showPassword={showPassword} handleTogglePassword={handleTogglePassword} />
-							<Button type="submit" className="mt-6 w-full">
-								Next
-							</Button>
-							{error && <p className="text-red-500 mt-2">{error}</p>}
-						</form>
-					)}
-					{step === 2 && <StepOTP otp={otp} setOtp={setOtp} email={email} summitOtp={summitOtp} resendOtp={resendOtp} error={error} setError={setError} countdown={countdown} />}
-					{step === 3 && <StepSuccess />}
-				</CardContent>
-			</Card>
-		</div>
+		<Suspense>
+			<div className="flex items-center justify-center w-full sm:h-screen flex-col sm:p-5 p-2 py-5 mt-12 sm:mt-0">
+				<Link href="/" className="flex gap-2 justify-center items-center mb-8 mt-8">
+					<Camera className="w-8 h-8" />
+					<h1 className="text-3xl font-black">Pictures</h1>
+				</Link>
+				<Card className="w-full sm:w-1/2 xl:w-1/4 sm:mx-5 border-0 sm:border">
+					<CardHeader className={(step === 2 ? 'pb-0 sm:px-6 px-3' : 'sm:px-6 px-3') || undefined}>
+						<CardTitle className="font-semibold tracking-tight text-2xl sm:text-left text-center">Signup</CardTitle>
+						{step !== 2 && <CardDescription className="text-sm text-muted-foreground">Enter your details below to sign up</CardDescription>}
+					</CardHeader>
+					<CardContent className="pt-0 sm:px-6 px-3">
+						{step === 1 && (
+							<form onSubmit={handleSubmit}>
+								<StepOne name={name} setName={setName} lastname={lastname} setLastname={setLastname} username={username} setUsername={setUsername} email={email} setEmail={setEmail} password={password} setPassword={setPassword} showPassword={showPassword} handleTogglePassword={handleTogglePassword} />
+								<Button type="submit" className="mt-6 w-full">
+									Next
+								</Button>
+								{error && <p className="text-red-500 mt-2">{error}</p>}
+							</form>
+						)}
+						{step === 2 && <StepOTP otp={otp} setOtp={setOtp} email={email} summitOtp={summitOtp} resendOtp={resendOtp} error={error} setError={setError} countdown={countdown} />}
+						{step === 3 && <StepSuccess />}
+					</CardContent>
+				</Card>
+			</div>
+		</Suspense>
 	);
-};
+}
 
-export default Signup;
+export default function SignUpPage() {
+	return (
+		<Suspense fallback={<div>Loading...</div>}>
+			<Signup />
+		</Suspense>
+	);
+}
