@@ -100,6 +100,9 @@ export const authOptions: AuthOptions = {
 				const name = (profile as Profile & { login?: string })?.login ? null : profile?.name || null;
 				const verified = account?.provider === 'google' || account?.provider === 'github' ? 1 : 2;
 
+				console.log('user', user);
+				console.log('user', user.email);
+
 				const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM users WHERE email = ?', [user.email]);
 
 				if (rows.length == 0) {
@@ -110,7 +113,7 @@ export const authOptions: AuthOptions = {
 							if (rows.length != 0 && account?.provider != rows[0]?.provider) {
 								return Promise.resolve(false);
 							} else {
-								await connection.execute('UPDATE users SET image = ? WHERE email = ?', [image]);
+								await connection.execute('UPDATE users SET image = ? WHERE email = ?', [image, user.email]);
 							}
 						}
 					}
@@ -120,7 +123,7 @@ export const authOptions: AuthOptions = {
 
 				let htmlContent = '';
 				try {
-					const filePath = path.join(process.cwd(), 'mail/otp.html');
+					const filePath = path.join(process.cwd(), 'mail/new.html');
 					htmlContent = fs.readFileSync(filePath, 'utf-8');
 					htmlContent = htmlContent.replaceAll('XXXXXXNEWXXXXXX', 'A new user has joined your gallery\n--------------------------\n\nName: ' + name + '\nEmail: ' + user.email + '\n\n--------------------------\n\nKooked');
 				} catch (error) {
