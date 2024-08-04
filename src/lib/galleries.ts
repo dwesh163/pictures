@@ -93,8 +93,9 @@ export async function getGallery(publicId: string, email: string): Promise<any> 
 			SELECT
 				g.galleryId,
 				CASE
-					WHEN u.nameDisplay = 1 OR u.username IS NULL THEN u.name
-					ELSE u.username
+					WHEN u.nameDisplay = 1 THEN u.name
+					WHEN u.username IS NOT NULL THEN u.username
+					ELSE u.name
 				END AS userName,
 				g.name AS galleryName,
 				g.description,
