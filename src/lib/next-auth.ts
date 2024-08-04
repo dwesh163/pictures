@@ -57,11 +57,7 @@ export const authOptions: AuthOptions = {
 						const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM users WHERE email = ?', [credentials.email]);
 						const user = rows[0] as MySQLUser;
 
-						console.log('User:', user);
-
 						if (user && user.password && (await bcrypt.compare(credentials.password, user.password))) {
-							console.log('User:', user);
-
 							return {
 								id: user.userId,
 								name: user.name,
@@ -100,9 +96,6 @@ export const authOptions: AuthOptions = {
 				const name = (profile as Profile & { login?: string })?.login ? null : profile?.name || null;
 				const verified = account?.provider === 'google' || account?.provider === 'github' ? 1 : 2;
 
-				console.log('user', user);
-				console.log('user', user.email);
-
 				const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM users WHERE email = ?', [user.email]);
 
 				if (rows.length == 0) {
@@ -130,7 +123,9 @@ export const authOptions: AuthOptions = {
 					console.error('Error reading HTML file:', error);
 				}
 
-				await sendEmail(adminRows.email, 'New user <contact@kooked.ch>', 'New user', htmlContent);
+				if (adminRows.length != 0) {
+					await sendEmail(adminRows.email, 'New user <contact@kooked.ch>', 'New user', htmlContent);
+				}
 
 				return Promise.resolve(true);
 			} catch (error) {
