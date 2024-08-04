@@ -22,7 +22,7 @@ const generateRandomOTP = (): string => {
 };
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
-	const { email, password, name } = await req.json();
+	const { name, lastname, username, phoneNumber, email, password } = await req.json();
 
 	if (!email || !password || !name) {
 		return NextResponse.json({ message: 'Missing fields' }, { status: 400 });
@@ -59,7 +59,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
 		await sendEmail(email, `Your Verification Code: ${otp} <contact@kooked.ch>`, `Your verification code: ${otp}`, htmlContent);
 
-		await connection.execute('INSERT INTO users (email, password, name, verified, provider) VALUES (?, ?, ?, ?, ?)', [email, hashedPassword, name, 1, 'credentials']);
+		await connection.execute('INSERT INTO users (email, password, name, username, phoneNumber, verified, provider) VALUES (?, ?, ?, ?, ?, ?, ?)', [email, hashedPassword, name + ' ' + lastname, username, phoneNumber, 1, 'credentials']);
 		await connection.execute('INSERT INTO otp (userId, otp, otpId) VALUES ((SELECT userId FROM users WHERE email = ?), ?, ?)', [email, otp, id]);
 
 		await connection.commit();
