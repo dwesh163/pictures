@@ -142,7 +142,7 @@ export function GalleriesList({ userData, galleries }: { userData: UserData; gal
 						}
 
 						return (
-							<Link href={`/gallery/${gallery.publicId}/edit`} key={index} className="w-full sm:w-fit">
+							<Link href={`/gallery/${gallery.publicId}`} key={index} className="w-full sm:w-fit">
 								<Card className="w-full sm:w-96 lg:h-[27rem] h-[25rem] cursor-pointer">
 									{coverImage.length !== 0 && images.length !== 0 ? (
 										<div className="grid grid-cols-2 h-[254px] rounded-t-lg overflow-hidden">
