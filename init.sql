@@ -9,11 +9,11 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255),
     bio TEXT,
     birthday DATE,
-    phoneNum VARCHAR(15),
+    phoneNumber VARCHAR(15),
     createdAt DATETIME DEFAULT NOW(),
     updatedAt DATETIME DEFAULT NOW() ON UPDATE NOW(),
     verified INT DEFAULT 0,
-    nameDisplay BOOLEAN DEFAULT FALSE,
+    nameDisplay BOOLEAN DEFAULT TRUE,
     PRIMARY KEY (userId)
 );
 
@@ -105,7 +105,7 @@ CREATE TABLE IF NOT EXISTS join_gallery_requests (
     createdAt DATETIME DEFAULT NOW(),
     code VARCHAR(6) NOT NULL,
     codeTryCount INT DEFAULT 0,
-    phoneNum VARCHAR(15),
+    phoneNumber VARCHAR(15),
     token VARCHAR(128) UNIQUE NOT NULL,
     FOREIGN KEY (galleryId) REFERENCES gallery (galleryId),
     FOREIGN KEY (userId) REFERENCES users (userId)
