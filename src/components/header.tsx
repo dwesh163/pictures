@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { Camera } from 'lucide-react';
 import { UserDropdown } from './user-dropdown';
+import { UserNotifications } from './user-notifications';
 
 export function Header() {
 	const { data: session, status } = useSession();
@@ -23,7 +24,10 @@ export function Header() {
 					<Link href="/auth/signin">Login</Link>
 				</Button>
 			) : (
-				<UserDropdown />
+				<div className="flex items-center gap-4 j">
+					<UserNotifications />
+					<UserDropdown />
+				</div>
 			)}
 		</header>
 	);
