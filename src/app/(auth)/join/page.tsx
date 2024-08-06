@@ -1,17 +1,17 @@
 'use server';
 import { getServerSession } from 'next-auth';
 import { redirect } from 'next/navigation';
-import Input from './input';
-import { getInfoSession } from '@/lib/users';
-import { getJoinInfo } from '@/lib/galleries';
+import { getInfoSession, userJoin } from '@/lib/users';
 import NotFound from '@/app/not-found';
 
 export default async function JoinPage({ searchParams }: { searchParams: { token?: string } }) {
 	const session = await getServerSession();
 
 	if (!session) {
-		redirect(`/auth/signup?callbackUrl=${process.env.NEXTAUTH_URL}/join?token=${searchParams.token}`);
+		redirect(`/auth/signin?callbackUrl=${process.env.NEXTAUTH_URL}/join?token=${searchParams.token}`);
 	}
+
+	const infoSession = await getInfoSession(session.user.email as string);
 
 	if (!searchParams.token) {
 		return (
@@ -21,7 +21,11 @@ export default async function JoinPage({ searchParams }: { searchParams: { token
 		);
 	}
 
-	const joinInfo = await getJoinInfo(searchParams.token);
+	const join = await userJoin(searchParams.token, infoSession.phoneNumber as string);
 
-	return <Input hasPhoneNum={joinInfo.phoneNumber != null} creator={joinInfo.name} name={joinInfo.galleryName} />;
+	if (!join) {
+		redirect(`/auth/signin?callbackUrl=${process.env.NEXTAUTH_URL}/join?token=${searchParams.token}`);
+	} else {
+		redirect(`/`);
+	}
 }
