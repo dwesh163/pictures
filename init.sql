@@ -111,6 +111,18 @@ CREATE TABLE IF NOT EXISTS join_gallery_requests (
     FOREIGN KEY (userId) REFERENCES users (userId)
 );
 
+CREATE TABLE IF NOT EXISTS notifications (
+    notificationId INT NOT NULL UNIQUE AUTO_INCREMENT,
+    userId INT NOT NULL,
+    message TEXT NOT NULL,
+    link VARCHAR(255),
+    type VARCHAR(50),
+    isRead BOOLEAN DEFAULT FALSE,
+    createdAt DATETIME DEFAULT NOW(),
+    PRIMARY KEY (notificationId),
+    FOREIGN KEY (userId) REFERENCES users (userId)
+);
+
 insert into
     pictures_db.accreditations (
         accreditationId,
