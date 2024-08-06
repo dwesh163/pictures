@@ -181,7 +181,7 @@ function Signup() {
 			return;
 		}
 
-		if (!phoneNumber.startsWith('0')) {
+		if (phoneNumber.length != 12) {
 			setError('Invalid phone number');
 			return;
 		}
@@ -207,6 +207,9 @@ function Signup() {
 		}
 	};
 
+	const callbackUrl = new URL(searchParams.get('callbackUrl') || '');
+	const token = callbackUrl.searchParams.get('token') || '';
+
 	const summitOtp = async () => {
 		if (!otpId) {
 			setError('OTP ID is missing');
@@ -218,11 +221,15 @@ function Signup() {
 				headers: {
 					'Content-Type': 'application/json',
 				},
-				body: JSON.stringify({ email, otpUser: otp, otpId }),
+				body: JSON.stringify({ email, otpUser: otp, otpId, token }),
 			});
 			const data = await response.json();
 			if (data.success) {
-				router.push(`/auth/signup/success?callbackUrl=${searchParams.get('callbackUrl')}`);
+				if (data.join) {
+					router.push(`/auth/signup/success?callbackUrl=/`);
+				} else {
+					router.push(`/auth/signup/success?callbackUrl=${searchParams.get('callbackUrl')}`);
+				}
 			} else {
 				setError('Invalid OTP');
 			}
