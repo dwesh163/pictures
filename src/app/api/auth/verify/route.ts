@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { dbConfig } from '@/lib/db/config';
 import mysql from 'mysql2/promise';
 import { NextRequest, NextResponse } from 'next/server'; // Adjust according to your setup
+import { userJoin } from '@/lib/users';
 
 async function connectMySQL(): Promise<mysql.Connection> {
 	try {
@@ -14,13 +15,14 @@ async function connectMySQL(): Promise<mysql.Connection> {
 }
 
 export async function POST(req: NextRequest): Promise<NextResponse> {
-	const { email, otpUser, otpId }: { email?: string; otpUser: string; otpId?: string } = await req.json();
+	const { email, otpUser, otpId, token }: { email?: string; otpUser: string; otpId?: string; token?: string } = await req.json();
 
 	if (!email || !otpUser || !otpId) {
 		return NextResponse.json({ message: 'Missing fields' }, { status: 400 });
 	}
 
 	let connection;
+	let join = false;
 
 	try {
 		connection = await connectMySQL();
@@ -47,12 +49,20 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 			return NextResponse.json({ message: 'Invalid verification code' }, { status: 400 });
 		}
 
-		await connection.execute('UPDATE users SET verified = 2 WHERE userId = ?', [user.userId]);
+		await connection.execute('UPDATE users SET verified = 3 WHERE userId = ?', [user.userId]);
 		await connection.execute('DELETE FROM otp WHERE otpId = ?', [otpId]);
+
+		console.log('token:', token);
 
 		await connection.commit();
 
-		return NextResponse.json({ success: 'Verification successful' }, { status: 200 });
+		if (token) {
+			console.log('user.phoneNumber:', user.phoneNumber);
+			join = await userJoin(token, user.phoneNumber as string);
+			console.log('join:', join);
+		}
+
+		return NextResponse.json({ success: 'Verification successful', join }, { status: 200 });
 	} catch (error) {
 		console.error('Error during verification process:', error);
 		if (connection) await connection.rollback();
