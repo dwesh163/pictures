@@ -130,3 +130,79 @@ export async function getId(email: string): Promise<any> {
 
 	return rows[0].userId;
 }
+
+export async function userJoin(token: string, phoneNumber: string): Promise<any> {
+	const connection = await connectMySQL();
+	const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM join_gallery_requests WHERE token = ?', [token]);
+
+	if (rows.length === 0) {
+		return false;
+	}
+
+	const [users]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM users WHERE phoneNumber = ?', [phoneNumber]);
+
+	if (users.length === 0) {
+		return false;
+	}
+
+	console.log('user :', users[0]);
+
+	console.log(rows[0].phoneNumber, users[0].phoneNumber);
+
+	if (rows[0].phoneNumber !== users[0].phoneNumber) {
+		return false;
+	}
+
+	const [gallery]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM gallery WHERE galleryId = ?', [rows[0].galleryId]);
+
+	await connection.beginTransaction();
+
+	try {
+		await connection.execute('INSERT INTO gallery_user_accreditations (userId, galleryId, accreditationId) VALUES ((SELECT userId FROM users WHERE phoneNumber = ?), ?, 3)', [phoneNumber, rows[0].galleryId]);
+		await connection.execute('DELETE FROM join_gallery_requests WHERE token = ?', [token]);
+		await connection.execute(`INSERT INTO notifications (userId, message, link, type) VALUES ((SELECT userId FROM users WHERE phoneNumber = ?), 'You have been added to gallery : ${gallery[0].name}', ?, 'info')`, [phoneNumber, '/gallery/' + gallery[0].publicId]);
+		await connection.commit();
+		return true;
+	} catch (error) {
+		await connection.rollback();
+		console.error('Error joining gallery:', error);
+		return false;
+	} finally {
+		connection.end();
+	}
+}
+
+export async function getNotifications(email: string, isRead: boolean) {
+	const connection = await connectMySQL();
+
+	console.log('email:', email, 'isRead:', isRead);
+
+	let query = `
+	  SELECT * 
+	  FROM notifications 
+	  WHERE userId = (
+		SELECT userId 
+		FROM users 
+		WHERE email = ?
+	  )`;
+
+	if (!isRead) {
+		query += ' AND isRead = 0';
+	}
+
+	console.log('query:', query);
+
+	const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute(query, [email]);
+
+	return rows;
+}
+
+export async function updateNotification(id: number, email: string): Promise<any> {
+	const connection = await connectMySQL();
+
+	console.log(`UPDATE notifications SET isRead = 1 WHERE notificationId = ${id} AND userId = (SELECT userId FROM users WHERE email = ${email})`);
+
+	await connection.execute('UPDATE notifications SET isRead = 1 WHERE notificationId = ? AND userId = (SELECT userId FROM users WHERE email = ?)', [id, email]);
+
+	connection.end();
+}
