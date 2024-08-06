@@ -90,11 +90,11 @@ export const authOptions: AuthOptions = {
 
 			const connection = await connectMySQL();
 			try {
-				const username = (profile as Profile & { login?: string })?.login || profile?.name?.replaceAll('|', '') || null;
+				const username = (profile as Profile & { login?: string })?.login || profile?.name || null;
 				const image = user.image || null;
 				const provider = account?.provider || null;
-				const name = (profile as Profile & { login?: string })?.login ? null : profile?.name || null;
-				const verified = account?.provider === 'google' || account?.provider === 'github' ? 1 : 2;
+				const name = profile?.name || (profile as Profile & { login?: string })?.login || null;
+				const verified = account?.provider === 'google' || account?.provider === 'github' ? 3 : 1;
 
 				const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM users WHERE email = ?', [user.email]);
 
