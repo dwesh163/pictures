@@ -1,4 +1,5 @@
 export type Gallery = {
+	gallery: Tags[];
 	galleryId: number;
 	userName: string;
 	galleryName: string | undefined | null;
@@ -10,19 +11,28 @@ export type Gallery = {
 	publicId: string;
 	coverText: string | undefined | null;
 	coverFont: string | undefined | null;
-	images: { userId: number; imageId: number; imageUrl: string }[] | null;
+	images:
+		| {
+				tags: any;
+				userId: number;
+				imageId: number;
+				imageUrl: string;
+		  }[]
+		| null;
 	coverImage: any;
 	accredited_users: { name: string; email: string; image: string; accreditationId: number }[] | null;
-	tags: { id: number; name: string }[] | null;
+	tags: Tags[];
 };
 
 export type Image = {
 	imageId: number;
 	userId: number;
 	imageUrl: string;
+	tags: Tags[];
 };
 
 export type Tags = {
 	id: number;
 	name: string;
+	cover: string;
 };

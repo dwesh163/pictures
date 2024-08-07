@@ -182,7 +182,7 @@ export async function getGallery(publicId: string, email: string): Promise<Galle
 
 		gallery.tags = tags as Tags[];
 
-		const imageIds = imageResults.map((image) => image.imageId);
+		const imageIds: number[] = imageResults.map((image: RowDataPacket) => image.imageId as number);
 		console.log('imageIds', imageIds);
 		if (imageIds.length != 0) {
 			const imageTagsQuery = `
@@ -208,12 +208,17 @@ export async function getGallery(publicId: string, email: string): Promise<Galle
 
 			console.log('imageTagsResults', imageTagsResults);
 
-			const imageTagsMap: { [key: number]: string[] } = {};
+			const imageTagsMap: { [key: number]: Tags[] } = {};
 			for (const imageTag of imageTagsResults) {
+				const tag: Tags = {
+					id: imageTag.id,
+					name: imageTag.name,
+					cover: imageTag.cover,
+				};
 				if (!imageTagsMap[imageTag.imageId]) {
 					imageTagsMap[imageTag.imageId] = [];
 				}
-				imageTagsMap[imageTag.imageId].push(imageTag);
+				imageTagsMap[imageTag.imageId].push(tag);
 			}
 			for (const image of imageResults) {
 				image.tags = imageTagsMap[image.imageId] || [];

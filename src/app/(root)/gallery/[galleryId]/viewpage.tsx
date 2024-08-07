@@ -36,7 +36,7 @@ export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: bool
 
 		const selectedTagNames = new Set(selectedTags.map((tag) => tag.name));
 
-		return image.tags.some((imgTag) => selectedTagNames.has(imgTag.name));
+		return image.tags.some((imgTag: { name: string }) => selectedTagNames.has(imgTag.name));
 	});
 
 	return (
