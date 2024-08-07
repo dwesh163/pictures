@@ -2,6 +2,7 @@ import mysql, { FieldPacket, RowDataPacket } from 'mysql2/promise';
 import { dbConfig } from '@/lib/db/config';
 import { v4 as uuidv4 } from 'uuid';
 import { AccredUser } from '@/types/user';
+import { Gallery, Image, Tags } from '@/types/gallery';
 import { sendEmail } from './mail';
 import path from 'path';
 import fs from 'fs';
@@ -82,92 +83,186 @@ export async function getGalleries(email: string): Promise<any> {
 		}
 	}
 }
-
-export async function getGallery(publicId: string, email: string): Promise<any> {
+export async function getGallery(publicId: string, email: string): Promise<Gallery | null> {
 	let connection;
+
 	try {
 		connection = await connectMySQL();
 		await connection.execute('SET SESSION group_concat_max_len = 100000000;');
-		const [galleries]: [RowDataPacket[], FieldPacket[]] = await connection.execute(
-			`
-			SELECT
-				g.galleryId,
-				CASE
-					WHEN u.nameDisplay = 1 THEN u.name
-					WHEN u.username IS NOT NULL THEN u.username
-					ELSE u.name
-				END AS userName,
-				g.name AS galleryName,
-				g.description,
-				g.createdAt,
-				g.updatedAt,
-				g.publicId,
-				g.public,
-				g.published,
-				g.coverImage,
-				g.coverFont,
-				g.coverText,
-				(
-					SELECT GROUP_CONCAT(
-								JSON_OBJECT(
-										'imageId', i.imageId, 'userId', i.userId, 'imageUrl', i.imageUrl
-								)
-								ORDER BY i.createdAt DESC SEPARATOR ','
-						)
-					FROM images i
-							JOIN image_gallery ig ON i.imageId = ig.imageId
-					WHERE ig.galleryId = g.galleryId
-				) AS images,
-				(
-					SELECT GROUP_CONCAT(
-								JSON_OBJECT(
-										'name',   CASE
-													WHEN accredited_users_sub.nameDisplay = 1 OR accredited_users_sub.username IS NULL  THEN accredited_users_sub.name
-													ELSE accredited_users_sub.username
-									END, 'image', accredited_users_sub.image, 'email', accredited_users_sub.email, 'accreditationId', accredited_users_sub.accreditationId
-								)
-								ORDER BY accredited_users_sub.accreditationId DESC SEPARATOR ','
-						)
-					FROM (
-							SELECT u.userId, u.nameDisplay, u.username, u.image, u.email, u.name, gua.accreditationId
-							FROM users u
-									JOIN gallery_user_accreditations gua ON u.userId = gua.userId
-							WHERE gua.galleryId = g.galleryId
 
-							UNION ALL
-							SELECT u.userId, u.nameDisplay, u.username, u.image, u.email,  u.name,0 AS accreditationId
-							FROM users u
-							WHERE u.userId = g.userId
+		// Récupérer les informations de la galerie
+		const galleryQuery = `
+            SELECT
+                g.galleryId,
+                COALESCE(
+                    CASE
+                        WHEN u.nameDisplay = 1 THEN u.name
+                        WHEN u.username IS NOT NULL THEN u.username
+                        ELSE u.name
+                    END,
+                    'Unknown'
+                ) AS userName,
+                g.name AS galleryName,
+                g.description,
+                g.createdAt,
+                g.updatedAt,
+                g.publicId,
+                g.public,
+                g.published,
+                g.coverImage,
+                g.coverFont,
+                g.coverText
+            FROM gallery g
+            LEFT JOIN users u ON g.userId = u.userId
+            WHERE
+                g.publicId = ?
+                AND (
+                    EXISTS (
+                        SELECT 1
+                        FROM gallery_user_accreditations gua
+                        WHERE gua.galleryId = g.galleryId
+                        AND gua.userId = (SELECT userId FROM users WHERE email = ?)
+                    )
+                    OR g.userId = (SELECT userId FROM users WHERE email = ?)
+                );
+        `;
 
-						) AS accredited_users_sub
-				) AS accredited_users
-			FROM gallery g
-					LEFT JOIN users u ON g.userId = u.userId
-			WHERE
-				g.publicId = ?
-			AND (EXISTS (
-				SELECT 1
-				FROM gallery_user_accreditations gua
-				WHERE gua.galleryId = g.galleryId
-				AND gua.userId = (SELECT userId FROM users WHERE email = ?)
-			) OR g.userId = (SELECT userId FROM users WHERE email = ?));
-        `,
-			[publicId, email, email]
-		);
+		const [galleryResults]: [RowDataPacket[], FieldPacket[]] = await connection.execute(galleryQuery, [publicId, email, email]);
 
-		if (!galleries.length) {
+		if (!galleryResults.length) {
 			return null;
 		}
 
-		const gallery = galleries.map((gallery) => {
-			console.log(gallery.images);
+		const gallery = galleryResults[0] as Gallery;
 
-			return {
-				...gallery,
-				images: gallery.images != null ? JSON.parse(`[ ${gallery.images} ]`) : [],
-				accredited_users: JSON.parse(`[ ${gallery.accredited_users} ]`),
-			};
-		})[0];
+		// Récupérer les images
+		const imagesQuery = `
+            SELECT
+                i.imageId,
+                i.userId,
+                i.imageUrl
+            FROM images i
+            JOIN image_gallery ig ON i.imageId = ig.imageId
+            WHERE ig.galleryId = (
+                SELECT g.galleryId
+                FROM gallery g
+                WHERE g.publicId = ?
+            )
+            ORDER BY i.createdAt DESC;
+        `;
+
+		const [imageResults]: [RowDataPacket[], FieldPacket[]] = await connection.execute(imagesQuery, [publicId]);
+
+		const tagsQuery = `
+           SELECT
+				CASE
+					WHEN t.name = 'user' THEN
+						CASE
+							WHEN u.nameDisplay = 1 THEN u.name
+							WHEN u.username IS NOT NULL THEN u.username
+							ELSE u.name
+						END
+					ELSE t.name
+				END AS name,
+				t.tagId AS id,
+				i.imageUrl AS cover  -- i.imageUrl will be NULL if coverId is NULL or doesn't match any imageId
+			FROM tags t
+			LEFT JOIN users u ON t.userId = u.userId
+			LEFT JOIN images i ON t.coverId = i.imageId
+			WHERE t.galleryId = (
+				SELECT g.galleryId
+				FROM gallery g
+				WHERE g.publicId = ?
+			);
+			`;
+
+		console.log('imageResults', imageResults);
+
+		const [tags]: [RowDataPacket[], FieldPacket[]] = await connection.execute(tagsQuery, [publicId]);
+
+		gallery.tags = tags as Tags[];
+
+		const imageIds = imageResults.map((image) => image.imageId);
+		console.log('imageIds', imageIds);
+		if (imageIds.length != 0) {
+			const imageTagsQuery = `
+				SELECT
+					it.imageId,
+					it.tagId,
+					CASE
+						WHEN t.name = 'user' THEN
+							CASE
+								WHEN u.nameDisplay = 1 THEN u.name
+								WHEN u.username IS NOT NULL THEN u.username
+								ELSE u.name
+							END
+						ELSE t.name
+					END AS name
+				FROM image_tags it
+				JOIN tags t ON it.tagId = t.tagId
+				LEFT JOIN users u ON t.userId = u.userId
+				WHERE it.imageId IN (${imageIds.join(', ')});
+			`;
+
+			const [imageTagsResults]: [RowDataPacket[], FieldPacket[]] = await connection.execute(imageTagsQuery);
+
+			console.log('imageTagsResults', imageTagsResults);
+
+			const imageTagsMap: { [key: number]: string[] } = {};
+			for (const imageTag of imageTagsResults) {
+				if (!imageTagsMap[imageTag.imageId]) {
+					imageTagsMap[imageTag.imageId] = [];
+				}
+				imageTagsMap[imageTag.imageId].push(imageTag);
+			}
+			for (const image of imageResults) {
+				image.tags = imageTagsMap[image.imageId] || [];
+			}
+		}
+
+		gallery.images = imageResults as Image[];
+
+		const accreditedUsersQuery = `
+            SELECT
+                COALESCE(
+                    CASE
+                        WHEN u.nameDisplay = 1 OR u.username IS NULL THEN u.name
+                        ELSE u.username
+                    END,
+                    'Unknown'
+                ) AS name,
+                u.image,
+                u.email,
+                gua.accreditationId
+            FROM gallery_user_accreditations gua
+            JOIN users u ON gua.userId = u.userId
+            WHERE gua.galleryId = (
+                SELECT g.galleryId
+                FROM gallery g
+                WHERE g.publicId = ?
+            )
+            UNION ALL
+            SELECT
+                COALESCE(
+                    CASE
+                        WHEN u.nameDisplay = 1 OR u.username IS NULL THEN u.name
+                        ELSE u.username
+                    END,
+                    'Unknown'
+                ) AS name,
+                u.image,
+                u.email,
+                0 AS accreditationId
+            FROM users u
+            WHERE u.userId = (
+                SELECT g.userId
+                FROM gallery g
+                WHERE g.publicId = ?
+            );
+        `;
+
+		const [accreditedUserResults]: [RowDataPacket[], FieldPacket[]] = await connection.execute(accreditedUsersQuery, [publicId, publicId]);
+		gallery.accredited_users = accreditedUserResults as AccredUser[];
 
 		return gallery;
 	} catch (error) {
@@ -186,6 +281,7 @@ export async function createGallery(name: string, description: string, email: st
 		const id = uuidv4();
 		connection = await connectMySQL();
 		await connection.execute('INSERT INTO gallery (name, description, publicId, userId) VALUES (?, ?, ?, (SELECT userId FROM users WHERE email = ?))', [name, description, id, email]);
+		await connection.execute('INSERT INTO tags (name, userId, galleryId) VALUES (?, (SELECT userId FROM users WHERE email = ?), (SELECT galleryId FROM gallery WHERE publicId = ?))', ['user', email, id]);
 		return id;
 	} catch (error) {
 		console.error('Error creating gallery:', error);
@@ -231,30 +327,51 @@ export async function canEditGallery(publicId: string, email: string): Promise<a
 	}
 }
 
-export async function saveImage(imageUrl: string, email: string, galleryId: string, fileInfo: any): Promise<any> {
+export async function saveImage(imageUrl: string, email: string, galleryId: string, tags: string[], fileInfo: any): Promise<void> {
 	let connection;
+
 	try {
 		connection = await connectMySQL();
 
-		const [[totalSize]]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT SUM(fileSize) AS totalSize FROM images WHERE userId = (SELECT userId FROM users WHERE email = ?)', [email]);
+		const [[{ totalSize }]]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT SUM(fileSize) AS totalSize FROM images WHERE userId = (SELECT userId FROM users WHERE email = ?)', [email]);
 
-		if (parseInt(totalSize.totalSize) > parseInt(String(process.env.TOTAL_IMAGE_SIZE) || '100000')) {
-			totalSize.totalSize, process.env.TOTAL_IMAGE_SIZE;
-
+		if (parseInt(totalSize as string, 10) > parseInt(process.env.TOTAL_IMAGE_SIZE || '100000', 10)) {
 			throw new Error('Total image size exceeded');
 		}
 
-		const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM images WHERE fileInfo = ? AND userId = (SELECT userId FROM users WHERE email = ?)', [fileInfo, email]);
+		const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM images WHERE fileInfo = ? AND userId = (SELECT userId FROM users WHERE email = ?)', [JSON.stringify(fileInfo), email]);
 
 		if (rows.length) {
 			throw new Error('Image already exists');
 		}
 
-		await connection.execute('INSERT INTO images (imageUrl, userId, fileSize, fileInfo) VALUES (?, (SELECT userId FROM users WHERE email = ?), ?, ?)', [imageUrl, email, fileInfo.size, fileInfo]);
+		await connection.execute('INSERT INTO images (imageUrl, userId, fileSize, fileInfo) VALUES (?, (SELECT userId FROM users WHERE email = ?), ?, ?)', [imageUrl, email, fileInfo.size, JSON.stringify(fileInfo)]);
 
-		const [[image]]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT imageId FROM images WHERE imageUrl = ?', [imageUrl]);
+		await connection.execute(
+			`INSERT INTO image_tags (imageId, tagId) 
+             VALUES (
+                (SELECT imageId FROM images WHERE imageUrl = ?),
+                (SELECT tagId FROM tags WHERE name = 'user' AND galleryId = ?)
+            )`,
+			[imageUrl, galleryId]
+		);
 
-		await connection.execute('INSERT INTO image_gallery (imageId, galleryId) VALUES (?, ?)', [image.imageId, galleryId]);
+		if (tags.length != 0) {
+			for (const tag of tags) {
+				await connection.execute(
+					`INSERT INTO image_tags (imageId, tagId) 
+                 VALUES (
+                    (SELECT imageId FROM images WHERE imageUrl = ?),
+                    (SELECT tagId FROM tags WHERE name = ? AND galleryId = ?)
+                 )`,
+					[imageUrl, tag, galleryId]
+				);
+			}
+		}
+
+		const [[{ imageId }]]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT imageId FROM images WHERE imageUrl = ?', [imageUrl]);
+
+		await connection.execute('INSERT INTO image_gallery (imageId, galleryId) VALUES (?, ?)', [imageId, galleryId]);
 	} catch (error) {
 		console.error('Error saving image:', error);
 		throw error;
