@@ -9,7 +9,7 @@ CREATE TABLE IF NOT EXISTS users (
     password VARCHAR(255),
     bio TEXT,
     birthday DATE,
-    phoneNumber VARCHAR(15),
+    phoneNumber VARCHAR(15) UNIQUE,
     createdAt DATETIME DEFAULT NOW(),
     updatedAt DATETIME DEFAULT NOW() ON UPDATE NOW(),
     verified INT DEFAULT 0,
@@ -121,6 +121,27 @@ CREATE TABLE IF NOT EXISTS notifications (
     createdAt DATETIME DEFAULT NOW(),
     PRIMARY KEY (notificationId),
     FOREIGN KEY (userId) REFERENCES users (userId)
+);
+
+CREATE TABLE IF NOT EXISTS tags (
+    tagId INT NOT NULL UNIQUE AUTO_INCREMENT,
+    galleryId INT NOT NULL,
+    coverId INT,
+    userId INT,
+    name VARCHAR(100) NOT NULL,
+    PRIMARY KEY (tagId),
+    FOREIGN KEY (galleryId) REFERENCES gallery (galleryId),
+    FOREIGN KEY (coverId) REFERENCES images (imageId),
+    FOREIGN KEY (userId) REFERENCES users (userId),
+    UNIQUE KEY unique_tag (galleryId, userId, name)
+);
+
+CREATE TABLE IF NOT EXISTS image_tags (
+    imageId INT NOT NULL,
+    tagId INT NOT NULL,
+    PRIMARY KEY (imageId, tagId),
+    FOREIGN KEY (imageId) REFERENCES images (imageId),
+    FOREIGN KEY (tagId) REFERENCES tags (tagId)
 );
 
 insert into
