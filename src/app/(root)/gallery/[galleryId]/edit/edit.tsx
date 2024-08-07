@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import UploadForm from '@/components/upload-form';
 import { Dot, Plus, UserRound, Ellipsis, Share, Pencil } from 'lucide-react';
-import { Gallery } from '@/types/gallery';
+import { Gallery, Tags } from '@/types/gallery';
 import { cn } from '@/lib/utils';
 import { UserData } from '@/types/user';
 import { Textarea } from '@/components/ui/textarea';
@@ -20,8 +20,10 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 	const [filesSaved, setFilesSaved] = useState<File[]>([]);
 	const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 	const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-	const [isSharetDialogOpen, setIsSharetDialogOpen] = useState(false);
+	const [isSharetDialogOpen, setIsShareDialogOpen] = useState(false);
 	const [gallery, setGallery] = useState<Gallery>(galleryData);
+	const [tags, setTags] = useState<Tags[]>(galleryData.tags ?? []);
+	const [importTags, setImportTags] = useState<Tags[]>([]);
 
 	const [errors, setErrors] = useState<string[]>([]);
 	const [name, setName] = useState<string>(galleryData.galleryName ?? '');
@@ -88,6 +90,7 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 			const formData = new FormData();
 			filesSaved.forEach((file) => formData.append('media', file));
 			formData.append('galleryId', gallery.galleryId.toString());
+			formData.append('tags', JSON.stringify(importTags));
 
 			const res = await fetch('/api/gallery/upload', {
 				method: 'POST',
@@ -156,7 +159,7 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 							</DialogFooter>
 						</DialogContent>
 					</Dialog>
-					<Dialog open={isSharetDialogOpen} onOpenChange={setIsSharetDialogOpen}>
+					<Dialog open={isSharetDialogOpen} onOpenChange={setIsShareDialogOpen}>
 						<DialogTrigger asChild>
 							{userData.accreditationId === 5 && (
 								<Button>
@@ -169,7 +172,7 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 								<DialogTitle>Share this gallery</DialogTitle>
 								<DialogDescription> Invite people to collaborate on this gallery by entering their email addresses.</DialogDescription>
 							</DialogHeader>
-							<ShareGallery galleryId={gallery?.publicId?.toString()} setIsSharetDialogOpen={setIsSharetDialogOpen} />
+							<ShareGallery galleryId={gallery?.publicId?.toString()} setIsShareDialogOpen={setIsShareDialogOpen} />
 						</DialogContent>
 					</Dialog>
 				</div>
