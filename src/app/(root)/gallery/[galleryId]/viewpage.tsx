@@ -1,11 +1,44 @@
 'use client';
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Gallery } from '@/types/gallery';
+import { Gallery, Tags, Image } from '@/types/gallery';
 import { Pencil } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
 import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 import Link from 'next/link';
 
 export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: boolean }) {
+	const [tags, setTags] = useState<Tags[]>(gallery.tags ?? []);
+	const [selectedTags, setSelectedTags] = useState<Tags[]>([]);
+	const [showAllImages, setShowAllImages] = useState<boolean>(false);
+
+	const handleTagSelection = (tag: Tags) => {
+		setShowAllImages(true);
+		if (selectedTags.some((t) => t.name === tag.name)) {
+			setSelectedTags(selectedTags.filter((t) => t.name !== tag.name));
+		} else {
+			setSelectedTags([...selectedTags, tag]);
+		}
+	};
+
+	const handleSelectAllTags = () => {
+		setSelectedTags(tags);
+	};
+
+	const handleDeselectAllTags = () => {
+		setSelectedTags([]);
+	};
+
+	const filteredImages = gallery.images?.filter((image) => {
+		if (selectedTags.length === 0) {
+			return true;
+		}
+
+		const selectedTagNames = new Set(selectedTags.map((tag) => tag.name));
+
+		return image.tags.some((imgTag) => selectedTagNames.has(imgTag.name));
+	});
+
 	return (
 		<div className="md:space-y-6 space-y-3 p-5 pb-8 md:p-10 md:pb-16">
 			<div className="flex items-center justify-between">
@@ -22,17 +55,67 @@ export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: bool
 				)}
 			</div>
 
+			<div className="flex items-center gap-4">
+				<div className="flex items-center gap-2">
+					<Checkbox
+						checked={!showAllImages && selectedTags.length === 0}
+						onCheckedChange={(checked) => {
+							if (checked) {
+								handleDeselectAllTags();
+								setShowAllImages(false);
+							}
+						}}
+					/>
+					<span>Tags</span>
+				</div>
+				<div className="flex items-center gap-2">
+					<Checkbox
+						checked={tags.length === selectedTags.length}
+						onCheckedChange={(checked) => {
+							if (checked) {
+								handleSelectAllTags();
+							} else {
+								handleDeselectAllTags();
+							}
+						}}
+					/>
+					<span>All</span>
+				</div>
+				{tags.map((tag, index) => (
+					<div className="flex items-center gap-2" key={index}>
+						<Checkbox checked={selectedTags.some((t) => t.name === tag.name)} onCheckedChange={(checked) => handleTagSelection(tag)} />
+						<span>{tag.name}</span>
+					</div>
+				))}
+			</div>
+
 			<div className="-ml-2 w-[calc(100%+1rem)]">
-				<ResponsiveMasonry columnsCountBreakPoints={{ 350: 2, 750: 4, 900: 5 }}>
+				<ResponsiveMasonry columnsCountBreakPoints={{ 350: 1, 750: 3, 900: 5 }}>
 					<Masonry>
-						{gallery?.images?.map((image, key) => (
-							<div key={'image' + key} className="m-2">
-								<img src={'/api/image/?imageUrl=' + image.imageUrl} alt={'image'} />
-							</div>
-						))}
+						{showAllImages
+							? filteredImages?.map((image, key) => (
+									<div key={'image' + key} className="m-2">
+										<img src={'/api/image/?imageUrl=' + image.imageUrl} alt={'image'} />
+									</div>
+							  ))
+							: tags.map((tag, index) => (
+									<div key={'cover-' + index} className="m-2">
+										<h3 className="font-bold">{tag.name}</h3>
+										<img
+											src={'/api/image/?imageUrl=' + tag.cover}
+											alt={tag.name}
+											className="my-2 cursor-pointer"
+											onClick={() => {
+												setSelectedTags([tag]);
+												setShowAllImages(true);
+											}}
+										/>
+									</div>
+							  ))}
 					</Masonry>
 				</ResponsiveMasonry>
 			</div>
+
 			<div className="flex items-center justify-center flex-col mt-12">
 				<span className="text-muted-foreground text-xs">Created by {gallery.userName}</span>
 				<span className="text-muted-foreground text-xs">All rights reserved</span>
