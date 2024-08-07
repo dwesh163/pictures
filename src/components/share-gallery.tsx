@@ -5,7 +5,7 @@ import { Separator } from '@/components/ui/separator';
 import { useState } from 'react';
 import { PhoneInput } from './phone-input';
 
-export function ShareGallery({ galleryId, setIsSharetDialogOpen }: { galleryId: string; setIsSharetDialogOpen: (value: boolean) => void }) {
+export function ShareGallery({ galleryId, setIsShareDialogOpen }: { galleryId: string; setIsShareDialogOpen: (value: boolean) => void }) {
 	const [email, setEmail] = useState('');
 	const [phoneNumber, setPhoneNumber] = useState('');
 	const [error, setError] = useState('');
@@ -20,7 +20,7 @@ export function ShareGallery({ galleryId, setIsSharetDialogOpen }: { galleryId: 
 		});
 		const data = await response.json();
 		if (data.success) {
-			setIsSharetDialogOpen(false);
+			setIsShareDialogOpen(false);
 		} else if (data.error) {
 			setError(data.error);
 		}
