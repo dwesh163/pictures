@@ -145,10 +145,6 @@ export async function userJoin(token: string, phoneNumber: string): Promise<any>
 		return false;
 	}
 
-	console.log('user :', users[0]);
-
-	console.log(rows[0].phoneNumber, users[0].phoneNumber);
-
 	if (rows[0].phoneNumber !== users[0].phoneNumber) {
 		return false;
 	}
@@ -161,6 +157,7 @@ export async function userJoin(token: string, phoneNumber: string): Promise<any>
 		await connection.execute('INSERT INTO gallery_user_accreditations (userId, galleryId, accreditationId) VALUES ((SELECT userId FROM users WHERE phoneNumber = ?), ?, 3)', [phoneNumber, rows[0].galleryId]);
 		await connection.execute('DELETE FROM join_gallery_requests WHERE token = ?', [token]);
 		await connection.execute(`INSERT INTO notifications (userId, message, link, type) VALUES ((SELECT userId FROM users WHERE phoneNumber = ?), 'You have been added to gallery : ${gallery[0].name}', ?, 'info')`, [phoneNumber, '/gallery/' + gallery[0].publicId]);
+		await connection.execute('INSERT INTO tags (name, userId, galleryId) VALUES (?, ?, ?)', ['user', users[0].userId, gallery[0].galleryId]);
 		await connection.commit();
 		return true;
 	} catch (error) {
@@ -174,8 +171,6 @@ export async function userJoin(token: string, phoneNumber: string): Promise<any>
 
 export async function getNotifications(email: string, isRead: boolean) {
 	const connection = await connectMySQL();
-
-	console.log('email:', email, 'isRead:', isRead);
 
 	let query = `
 	  SELECT * 
