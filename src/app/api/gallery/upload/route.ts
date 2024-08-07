@@ -25,6 +25,7 @@ export async function POST(req: Request, res: Response) {
 		const formData = await req.formData();
 		const files = formData.getAll('media') as File[];
 		const galleryId = formData.get('galleryId') as string;
+		const tags = JSON.parse(formData.get('tags')) as string[];
 
 		if (!galleryId) {
 			return NextResponse.json({ error: 'Gallery ID is required' }, { status: 400 });
@@ -68,7 +69,7 @@ export async function POST(req: Request, res: Response) {
 			const filePath = path.join(uploadDir, filename);
 
 			try {
-				await saveImage(filename, email, galleryId, { name: file.name, size: file.size, type: file.type, lastModified: file.lastModified });
+				await saveImage(filename, email, galleryId, tags, { name: file.name, size: file.size, type: file.type, lastModified: file.lastModified });
 
 				await fs.writeFile(filePath, buffer);
 				return filePath;
