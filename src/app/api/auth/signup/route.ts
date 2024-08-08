@@ -24,8 +24,16 @@ const generateRandomOTP = (): string => {
 export async function POST(req: NextRequest): Promise<NextResponse> {
 	const { name, lastname, username, phoneNumber, email, password } = await req.json();
 
-	if (!email || !password || !name) {
-		return NextResponse.json({ message: 'Missing fields' }, { status: 400 });
+	if (!email || !password || !name || !lastname || !username || !phoneNumber) {
+		return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
+	}
+
+	if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+		return NextResponse.json({ error: 'Invalid email' }, { status: 400 });
+	}
+
+	if (!/^\+\d{11}$/.test(phoneNumber)) {
+		return NextResponse.json({ error: 'Invalid phone number' }, { status: 400 });
 	}
 
 	let connection: mysql.Connection | null = null;
@@ -39,7 +47,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
 		if (existingUser) {
 			await connection.rollback();
-			return NextResponse.json({ message: 'User already exists' }, { status: 400 });
+			return NextResponse.json({ error: 'User already exists' }, { status: 400 });
 		}
 
 		const hashedPassword = await bcrypt.hash(password, 10);
@@ -54,7 +62,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 		} catch (error) {
 			console.error('Error reading HTML file:', error);
 			await connection.rollback();
-			return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+			return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 		}
 
 		await sendEmail(email, `Your Verification Code: ${otp} <contact@kooked.ch>`, `Your verification code: ${otp}`, htmlContent);
@@ -64,11 +72,11 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 
 		await connection.commit();
 
-		return NextResponse.json({ message: 'User created', otpId: id }, { status: 201 });
+		return NextResponse.json({ error: 'User created', otpId: id }, { status: 201 });
 	} catch (error) {
 		console.error('Error during user sign-up:', error);
 		if (connection) await connection.rollback();
-		return NextResponse.json({ message: 'Internal server error' }, { status: 500 });
+		return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
 	} finally {
 		if (connection) await connection.end();
 	}
