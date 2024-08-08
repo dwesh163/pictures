@@ -31,12 +31,15 @@ export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: bool
 	};
 
 	const filteredImages = gallery.images?.filter((image) => {
+		// If no tags are selected, return all images
 		if (selectedTags.length === 0) {
 			return true;
 		}
 
+		// Create a set of selected tag names for efficient look-up
 		const selectedTagNames = new Set(selectedTags.map((tag) => tag.name));
 
+		// Return true if any tag of the image is in the selected tags
 		return image.tags.some((imgTag: { name: string }) => selectedTagNames.has(imgTag.name));
 	});
 
@@ -102,16 +105,14 @@ export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: bool
 							: tags.map(
 									(tag, index) =>
 										tag.cover && (
-											<div key={'cover-' + index} className="relative m-2 cursor-pointer">
-												<img
-													src={`/api/image/?imageUrl=${tag.cover}`}
-													alt={tag.name}
-													className="w-full h-auto cursor-pointer"
-													onClick={() => {
-														setSelectedTags([tag]);
-														setShowAllImages(true);
-													}}
-												/>
+											<div
+												key={'cover-' + index}
+												className="relative m-2 cursor-pointer"
+												onClick={() => {
+													setSelectedTags([tag]);
+													setShowAllImages(true);
+												}}>
+												<img src={`/api/image/?imageUrl=${tag.cover}`} alt={tag.name} className="w-full h-auto cursor-pointer" />
 												<div className="absolute bottom-0 w-full h-full flex justify-content items-center transform text-center bg-black opacity-70 text-white p-1 rounded">
 													<h3 className="text-xs lg:text-xl text-center w-full font-black">{tag.name}</h3>
 												</div>
