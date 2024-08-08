@@ -5,31 +5,35 @@ import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import UploadForm from '@/components/upload-form';
-import { Dot, Plus, UserRound, Ellipsis, Share, Pencil } from 'lucide-react';
-import { Gallery, Tags } from '@/types/gallery';
+import { Dot, Plus, UserRound, Ellipsis, Share, Pencil, Tag as LucideTag, Trash2 } from 'lucide-react';
+import { Gallery, Tag } from '@/types/gallery';
 import { cn } from '@/lib/utils';
 import { UserData } from '@/types/user';
-import { Textarea } from '@/components/ui/textarea';
 import { Separator } from '@/components/ui/separator';
 import { ShareGallery } from '@/components/share-gallery';
 import { UserAccred } from '@/components/user-accred';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 export function EditPage({ galleryData, userData }: { galleryData: Gallery; userData: UserData }) {
 	const [filesSaved, setFilesSaved] = useState<File[]>([]);
 	const [previewUrls, setPreviewUrls] = useState<string[]>([]);
 	const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
-	const [isSharetDialogOpen, setIsShareDialogOpen] = useState(false);
+	const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+	const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
 	const [gallery, setGallery] = useState<Gallery>(galleryData);
-	const [tags, setTags] = useState<Tags[]>(galleryData.tags ?? []);
-	const [importTags, setImportTags] = useState<Tags[]>([]);
-
+	const [tags, setTags] = useState<Tag[]>(galleryData.tags ?? []);
+	const [importTags, setImportTags] = useState<Tag[]>([]);
+	const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
+	const [searchTags, setSearchTags] = useState<string>('');
 	const [errors, setErrors] = useState<string[]>([]);
 	const [name, setName] = useState<string>(galleryData.galleryName ?? '');
 	const [description, setDescription] = useState<string>(galleryData.description ?? '');
 
-	async function updateGallery(event: React.FormEvent<HTMLFormElement>) {
+	const updateGallery = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
 		const newErrors: string[] = [];
 
@@ -47,18 +51,19 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 		}
 
 		try {
-			const response = await fetch('/api/gallery/create', {
+			const response = await fetch('/api/gallery/update', {
 				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json',
-				},
+				headers: { 'Content-Type': 'application/json' },
 				body: JSON.stringify({ name, description }),
 			});
+			if (!response.ok) {
+				throw new Error('Failed to update gallery');
+			}
 		} catch (error) {
 			console.error('Error:', error);
-			setErrors(['Error creating gallery']);
+			setErrors(['Error updating gallery']);
 		}
-	}
+	};
 
 	const handleFilesChange = (files: File[]) => {
 		setFilesSaved((prevFiles) => [...prevFiles, ...files]);
@@ -72,12 +77,16 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 	};
 
 	const onGalleryUpdate = async () => {
-		const response = await fetch('/api/gallery/' + gallery.publicId);
-		const data = await response.json();
-		if (!response.ok) {
-			console.error('Failed to fetch gallery:', data);
+		try {
+			const response = await fetch('/api/gallery/' + gallery.publicId);
+			const data = await response.json();
+			if (!response.ok) {
+				throw new Error('Failed to fetch gallery');
+			}
+			setGallery(data);
+		} catch (error) {
+			console.error('Failed to fetch gallery:', error);
 		}
-		setGallery(data);
 	};
 
 	const handleUpload = async () => {
@@ -92,11 +101,7 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 			formData.append('galleryId', gallery.galleryId.toString());
 			formData.append('tags', JSON.stringify(importTags));
 
-			const res = await fetch('/api/gallery/upload', {
-				method: 'POST',
-				body: formData,
-			});
-
+			const res = await fetch('/api/gallery/upload', { method: 'POST', body: formData });
 			const { success, error }: { success: string | null; error: string | null } = await res.json();
 
 			if (error) {
@@ -119,10 +124,57 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 		setPreviewUrls([]);
 	};
 
+	const handleTagSelection = (tag: Tag) => {
+		setSelectedTags((prevSelectedTags) => (prevSelectedTags.some((t) => t.name === tag.name) ? prevSelectedTags.filter((t) => t.name !== tag.name) : [...prevSelectedTags, tag]));
+	};
+
+	const handleUpdateTag = async () => {
+		try {
+			const response = await fetch('/api/gallery/update-tags', {
+				method: 'POST',
+				headers: { 'Content-Type': 'application/json' },
+				body: JSON.stringify({ galleryId: gallery.galleryId, tags: selectedTags }),
+			});
+			if (!response.ok) {
+				throw new Error('Failed to update tags');
+			}
+			setTags((prevTags) => prevTags.map((tag) => (selectedTags.some((t) => t.name === tag.name) ? { ...tag, selected: true } : tag)));
+			setSelectedTags([]);
+			setIsTagDialogOpen(false);
+		} catch (error) {
+			console.error('Error updating tags:', error);
+		}
+	};
+
 	const users = gallery.accredited_users?.filter((user) => user.email !== userData.email) ?? [];
+	const filteredTags = tags.filter((tag) => tag.name.toLowerCase().includes(searchTags.toLowerCase()));
+
+	console.log('filteredTags', filteredTags);
 
 	return (
 		<div className="md:space-y-6 space-y-3 p-5 pb-8 md:p-10 md:pb-16">
+			<Dialog open={isTagDialogOpen} onOpenChange={setIsTagDialogOpen}>
+				<DialogContent className="w-[95%] sm:w-1/2">
+					<DialogHeader>
+						<DialogTitle>Modify tags</DialogTitle>
+						<DialogDescription>Select tags</DialogDescription>
+					</DialogHeader>
+					<Input placeholder="Search tags..." value={searchTags} onChange={(e) => setSearchTags(e.target.value)} />
+					<ScrollArea className="h-[29vh] w-full flex flex-wrap">
+						{filteredTags.map((tag, index) => (
+							<div className="flex items-center gap-2" key={index}>
+								<Checkbox checked={selectedTags.some((t) => t.name === tag.name)} onCheckedChange={(checked) => handleTagSelection(tag)} />
+								<span>{tag.name}</span>
+							</div>
+						))}
+					</ScrollArea>
+					<DialogFooter className="mt-3">
+						<Button onClick={handleUpdateTag} className="w-full" type="button">
+							Update tags
+						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
 			<div className="flex items-center justify-between">
 				<div className="space-y-0.5">
 					<h2 className="md:text-2xl text-xl font-bold tracking-tight flex gap-1 items-center">
@@ -139,12 +191,12 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 								<Plus className="sm:mr-2 h-4 w-4" /> <span className="hidden sm:flex">Import pictures</span>
 							</Button>
 						</DialogTrigger>
-						<DialogContent className="w-[95%] sm:w-1/2 ">
+						<DialogContent className="w-[95%] sm:w-1/2">
 							<DialogHeader>
 								<DialogTitle>Import pictures</DialogTitle>
 								<DialogDescription className="flex sm:justify-between justify-center">
 									<span className="hidden sm:flex">Select or drag and drop</span>
-									<span className="flex ">
+									<span className="flex">
 										{getTotalFileSize(filesSaved)}
 										<Dot className="-mx-1" />
 										{filesSaved.length} Picture{filesSaved.length > 1 && 's'}
@@ -153,13 +205,13 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 								<UploadForm clearFiles={clearFiles} onFilesChange={handleFilesChange} previewUrls={previewUrls} setPreviewUrls={setPreviewUrls} />
 							</DialogHeader>
 							<DialogFooter className="mt-3">
-								<Button onClick={handleUpload} className="w-full" disabled={filesSaved.length === 0} type="submit">
+								<Button onClick={handleUpload} className="w-full" disabled={filesSaved.length === 0} type="button">
 									Import pictures
 								</Button>
 							</DialogFooter>
 						</DialogContent>
 					</Dialog>
-					<Dialog open={isSharetDialogOpen} onOpenChange={setIsShareDialogOpen}>
+					<Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
 						<DialogTrigger asChild>
 							{userData.accreditationId === 5 && (
 								<Button>
@@ -167,10 +219,10 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 								</Button>
 							)}
 						</DialogTrigger>
-						<DialogContent className="w-[95%] sm:w-1/2 ">
+						<DialogContent className="w-[95%] sm:w-1/2">
 							<DialogHeader>
 								<DialogTitle>Share this gallery</DialogTitle>
-								<DialogDescription> Invite people to collaborate on this gallery by entering their email addresses.</DialogDescription>
+								<DialogDescription>Invite people to collaborate on this gallery by entering their email addresses.</DialogDescription>
 							</DialogHeader>
 							<ShareGallery galleryId={gallery?.publicId?.toString()} setIsShareDialogOpen={setIsShareDialogOpen} />
 						</DialogContent>
@@ -204,11 +256,14 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 								))}
 							</div>
 						)}
+						<Button type="submit" className="w-full mt-4">
+							Update Gallery
+						</Button>
 					</form> */}
-					<div className={cn('flex items-center w-full ', users.length !== 0 && 'pl-6 -ml-2')}>
+					<div className={cn('flex items-center w-full', users.length !== 0 && 'pl-6 -ml-2')}>
 						{users.length !== 0 ? (
 							<>
-								{users.slice(0, 4).map((user: { name: string; image: string }, userIndex: number) => {
+								{users.slice(0, 4).map((user, userIndex) => {
 									const { name, image } = user;
 									return (
 										<div className="flex items-center justify-center bg-background rounded-full w-12 h-12 -ml-6 z-40" key={userIndex}>
@@ -264,7 +319,7 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 								<DialogTrigger asChild>{userData.accreditationId === 5 && <Button variant="outline">Manage</Button>}</DialogTrigger>
 								<DialogContent className="w-[95%] sm:w-1/2 sm:p-6 px-3 py-6">
 									<DialogHeader>
-										<DialogTitle>People with access </DialogTitle>
+										<DialogTitle>People with access</DialogTitle>
 										<DialogDescription>Invite user to collaborate.</DialogDescription>
 									</DialogHeader>
 									<UserAccred galleryId={gallery?.publicId?.toString()} />
@@ -277,15 +332,30 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 
 			<Separator />
 
-			{gallery?.images?.length != 0 && (
+			{gallery?.images?.length !== 0 && (
 				<div className="-ml-2 w-[calc(100%+1rem)]">
 					<ResponsiveMasonry columnsCountBreakPoints={{ 350: 2, 750: 4, 900: 5 }}>
 						<Masonry>
-							{gallery?.images?.map((image, key) => (
-								<div key={'image' + key} className="p-2">
-									<img src={'/api/image/?imageUrl=' + image.imageUrl} alt={'image'} />
-								</div>
-							))}
+							{gallery.images &&
+								gallery.images.map((image, key) => (
+									<div key={'image' + key} className="p-2 relative">
+										<div className="absolute bottom-6 w-full left-0 flex gap-2">
+											<div className="flex items-center w-full gap-2 justify-center">
+												<Button
+													onClick={() => {
+														setIsTagDialogOpen(true);
+														setSelectedTags(image.tags);
+													}}>
+													<LucideTag />
+												</Button>
+												<Button>
+													<Trash2 />
+												</Button>
+											</div>
+										</div>
+										<img src={'/api/image/?imageUrl=' + image.imageUrl} alt={'image'} />
+									</div>
+								))}
 						</Masonry>
 					</ResponsiveMasonry>
 				</div>
