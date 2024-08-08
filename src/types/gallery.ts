@@ -1,5 +1,5 @@
 export type Gallery = {
-	gallery: Tags[];
+	gallery: Tag[];
 	galleryId: number;
 	userName: string;
 	galleryName: string | undefined | null;
@@ -21,17 +21,17 @@ export type Gallery = {
 		| null;
 	coverImage: any;
 	accredited_users: { name: string; email: string; image: string; accreditationId: number }[] | null;
-	tags: Tags[];
+	tags: Tag[];
 };
 
 export type Image = {
 	imageId: number;
 	userId: number;
 	imageUrl: string;
-	tags: Tags[];
+	tags: Tag[];
 };
 
-export type Tags = {
+export type Tag = {
 	id: number;
 	name: string;
 	cover: string;

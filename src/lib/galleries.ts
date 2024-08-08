@@ -2,7 +2,7 @@ import mysql, { FieldPacket, RowDataPacket } from 'mysql2/promise';
 import { dbConfig } from '@/lib/db/config';
 import { v4 as uuidv4 } from 'uuid';
 import { AccredUser } from '@/types/user';
-import { Gallery, Image, Tags } from '@/types/gallery';
+import { Gallery, Image, Tag } from '@/types/gallery';
 import { sendEmail } from './mail';
 import path from 'path';
 import fs from 'fs';
@@ -180,7 +180,7 @@ export async function getGallery(publicId: string, email: string): Promise<Galle
 
 		const [tags]: [RowDataPacket[], FieldPacket[]] = await connection.execute(tagsQuery, [publicId]);
 
-		gallery.tags = tags as Tags[];
+		gallery.tags = tags as Tag[];
 
 		const imageIds: number[] = imageResults.map((image: RowDataPacket) => image.imageId as number);
 		console.log('imageIds', imageIds);
@@ -208,9 +208,9 @@ export async function getGallery(publicId: string, email: string): Promise<Galle
 
 			console.log('imageTagsResults', imageTagsResults);
 
-			const imageTagsMap: { [key: number]: Tags[] } = {};
+			const imageTagsMap: { [key: number]: Tag[] } = {};
 			for (const imageTag of imageTagsResults) {
-				const tag: Tags = {
+				const tag: Tag = {
 					id: imageTag.id,
 					name: imageTag.name,
 					cover: imageTag.cover,
