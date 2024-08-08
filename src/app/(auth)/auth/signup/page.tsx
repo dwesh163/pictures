@@ -219,7 +219,7 @@ function Signup() {
 	const callbackUrlParam = searchParams.get('callbackUrl');
 
 	let token = '';
-	let callbackUrl = new URL(process.env.NEXTAUTH_URL || 'http://localhost:3000');
+	let callbackUrl = new URL('https://pictures.kooked.ch/');
 
 	if (callbackUrlParam && callbackUrlParam.includes('token') && isUrl(callbackUrlParam)) {
 		callbackUrl = new URL(callbackUrlParam);
