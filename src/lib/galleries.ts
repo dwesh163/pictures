@@ -312,6 +312,7 @@ export async function canEditGallery(publicId: string, email: string): Promise<a
 				FROM gallery_user_accreditations gua
 				WHERE gua.galleryId = g.galleryId
 				AND gua.userId = (SELECT userId FROM users WHERE email = ?)
+				AND gua.accreditationId >= 4
 			) OR g.userId = (SELECT userId FROM users WHERE email = ?));
 		`,
 			[publicId, email, email]
