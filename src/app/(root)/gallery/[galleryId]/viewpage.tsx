@@ -1,5 +1,5 @@
 'use client';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Gallery, Tag, Image } from '@/types/gallery';
 import { Pencil } from 'lucide-react';
@@ -29,6 +29,16 @@ export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: bool
 	const handleDeselectAllTags = () => {
 		setSelectedTags([]);
 	};
+
+	useEffect(() => {
+		console.log('Selected tags:', selectedTags);
+		console.log('Tags:', tags);
+		console.log(selectedTags.length);
+		if (selectedTags.length == 0) {
+			console.log('No tags, showing all images');
+			setShowAllImages(false);
+		}
+	}, [selectedTags]);
 
 	const filteredImages = gallery.images?.filter((image) => {
 		// If no tags are selected, return all images
