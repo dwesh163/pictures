@@ -218,12 +218,12 @@ function Signup() {
 
 	const callbackUrlParam = searchParams.get('callbackUrl');
 
+	let token = '';
+	let callbackUrl = '/';
+
 	if (callbackUrlParam && callbackUrlParam.includes('token') && isUrl(callbackUrlParam)) {
-		const callbackUrl = new URL(callbackUrlParam);
-		const token = callbackUrl.searchParams.get('token') || '';
-	} else {
-		const callbackUrl = '/';
-		const token = '';
+		callbackUrl = new URL(callbackUrlParam);
+		token = callbackUrl.searchParams.get('token') || '';
 	}
 
 	const summitOtp = async () => {
