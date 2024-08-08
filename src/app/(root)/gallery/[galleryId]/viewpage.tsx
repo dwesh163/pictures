@@ -1,18 +1,18 @@
 'use client';
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Gallery, Tags, Image } from '@/types/gallery';
+import { Gallery, Tag, Image } from '@/types/gallery';
 import { Pencil } from 'lucide-react';
 import { Checkbox } from '@/components/ui/checkbox';
 import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 import Link from 'next/link';
 
 export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: boolean }) {
-	const [tags, setTags] = useState<Tags[]>(gallery.tags ?? []);
-	const [selectedTags, setSelectedTags] = useState<Tags[]>([]);
+	const [tags, setTags] = useState<Tag[]>(gallery.tags ?? []);
+	const [selectedTags, setSelectedTags] = useState<Tag[]>([]);
 	const [showAllImages, setShowAllImages] = useState<boolean>(false);
 
-	const handleTagSelection = (tag: Tags) => {
+	const handleTagSelection = (tag: Tag) => {
 		setShowAllImages(true);
 		if (selectedTags.some((t) => t.name === tag.name)) {
 			setSelectedTags(selectedTags.filter((t) => t.name !== tag.name));
@@ -67,7 +67,7 @@ export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: bool
 							}
 						}}
 					/>
-					<span>Tags</span>
+					<span>Tag</span>
 				</div> */}
 				<div className="flex items-center gap-2">
 					<Checkbox
