@@ -178,7 +178,7 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 			<div className="flex items-center justify-between">
 				<div className="space-y-0.5">
 					<h2 className="md:text-2xl text-xl font-bold tracking-tight flex gap-1 items-center">
-						{gallery.galleryName} <Pencil className="h-4 w-4 mt-2 md:h-5 md:w-5 md:mt-2.5" />
+						{gallery.galleryName} <Pencil className="h-4 w-4 mt-0.5 md:h-5 md:w-5" />
 					</h2>
 					<p className="text-muted-foreground md:text-base text-xs flex gap-1 items-center">
 						{gallery.description} <Pencil className="h-3 w-3 mt-1 md:w-4 md:h-4" />
