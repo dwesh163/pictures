@@ -216,8 +216,10 @@ function Signup() {
 		}
 	};
 
-	if ((searchParams.get('callbackUrl') || '').includes('token') && isUrl(searchParams.get('callbackUrl'))) {
-		const callbackUrl = new URL(searchParams.get('callbackUrl') || '/');
+	const callbackUrlParam = searchParams.get('callbackUrl');
+
+	if (callbackUrlParam && callbackUrlParam.includes('token') && isUrl(callbackUrlParam)) {
+		const callbackUrl = new URL(callbackUrlParam);
 		const token = callbackUrl.searchParams.get('token') || '';
 	} else {
 		const callbackUrl = '/';
