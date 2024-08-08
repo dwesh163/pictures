@@ -207,8 +207,22 @@ function Signup() {
 		}
 	};
 
-	const callbackUrl = new URL(searchParams.get('callbackUrl') || '');
-	const token = callbackUrl.searchParams.get('token') || '';
+	const isUrl = (url: string) => {
+		try {
+			new URL(url);
+			return true;
+		} catch (error) {
+			return false;
+		}
+	};
+
+	if ((searchParams.get('callbackUrl') || '').includes('token') && isUrl(searchParams.get('callbackUrl'))) {
+		const callbackUrl = new URL(searchParams.get('callbackUrl') || '/');
+		const token = callbackUrl.searchParams.get('token') || '';
+	} else {
+		const callbackUrl = '/';
+		const token = '';
+	}
 
 	const summitOtp = async () => {
 		if (!otpId) {
