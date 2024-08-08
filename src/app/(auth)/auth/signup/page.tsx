@@ -219,7 +219,7 @@ function Signup() {
 	const callbackUrlParam = searchParams.get('callbackUrl');
 
 	let token = '';
-	let callbackUrl = '/';
+	let callbackUrl = new URL('/');
 
 	if (callbackUrlParam && callbackUrlParam.includes('token') && isUrl(callbackUrlParam)) {
 		callbackUrl = new URL(callbackUrlParam);
