@@ -23,6 +23,7 @@ export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: bool
 
 	const handleSelectAllTags = () => {
 		setSelectedTags(tags);
+		setShowAllImages(true);
 	};
 
 	const handleDeselectAllTags = () => {
@@ -56,7 +57,7 @@ export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: bool
 			</div>
 
 			<div className="flex items-center gap-4">
-				<div className="flex items-center gap-2">
+				{/* <div className="flex items-center gap-2">
 					<Checkbox
 						checked={!showAllImages && selectedTags.length === 0}
 						onCheckedChange={(checked) => {
@@ -67,7 +68,7 @@ export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: bool
 						}}
 					/>
 					<span>Tags</span>
-				</div>
+				</div> */}
 				<div className="flex items-center gap-2">
 					<Checkbox
 						checked={tags.length === selectedTags.length}
@@ -94,24 +95,29 @@ export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: bool
 					<Masonry>
 						{showAllImages
 							? filteredImages?.map((image, key) => (
-									<div key={'image' + key} className="m-2">
-										<img src={'/api/image/?imageUrl=' + image.imageUrl} alt={'image'} />
+									<div key={'image-' + key} className="relative m-2">
+										<img src={`/api/image/?imageUrl=${image.imageUrl}`} alt="Image" className="w-full h-auto" />
 									</div>
 							  ))
-							: tags.map((tag, index) => (
-									<div key={'cover-' + index} className="m-2">
-										<h3 className="font-bold">{tag.name}</h3>
-										<img
-											src={'/api/image/?imageUrl=' + tag.cover}
-											alt={tag.name}
-											className="my-2 cursor-pointer"
-											onClick={() => {
-												setSelectedTags([tag]);
-												setShowAllImages(true);
-											}}
-										/>
-									</div>
-							  ))}
+							: tags.map(
+									(tag, index) =>
+										tag.cover && (
+											<div key={'cover-' + index} className="relative m-2 cursor-pointer">
+												<img
+													src={`/api/image/?imageUrl=${tag.cover}`}
+													alt={tag.name}
+													className="w-full h-auto cursor-pointer"
+													onClick={() => {
+														setSelectedTags([tag]);
+														setShowAllImages(true);
+													}}
+												/>
+												<div className="absolute bottom-0 w-full h-full flex justify-content items-center transform text-center bg-black opacity-70 text-white p-1 rounded">
+													<h3 className="text-xs lg:text-xl text-center w-full font-black">{tag.name}</h3>
+												</div>
+											</div>
+										)
+							  )}
 					</Masonry>
 				</ResponsiveMasonry>
 			</div>
