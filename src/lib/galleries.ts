@@ -368,7 +368,7 @@ export async function saveImage(imageUrl: string, email: string, galleryId: stri
 					`INSERT INTO image_tags (imageId, tagId) 
                  VALUES (
                     (SELECT imageId FROM images WHERE imageUrl = ?),
-                    (SELECT tagId FROM tags WHERE name = ? AND galleryId = ?)
+                    (SELECT tagId FROM tags WHERE name = ? AND galleryId = ? AND userId = (SELECT userId FROM users WHERE email = ?))
                  )`,
 					[imageUrl, tag, galleryId]
 				);
