@@ -358,20 +358,20 @@ export async function saveImage(imageUrl: string, email: string, galleryId: stri
              VALUES (
                 (SELECT imageId FROM images WHERE imageUrl = ?),
                 (SELECT tagId FROM tags WHERE name = ? AND galleryId = ? AND userId = (SELECT userId FROM users WHERE email = ?))
-
             )`,
-			[imageUrl, galleryId]
+			[imageUrl, galleryId, email]
 		);
 
 		if (tags.length != 0) {
 			for (const tag of tags) {
 				await connection.execute(
-					`INSERT INTO image_tags (imageId, tagId) 
-                 VALUES (
-                    (SELECT imageId FROM images WHERE imageUrl = ?),
-                    (SELECT tagId FROM tags WHERE name = ? AND galleryId = ? AND userId = (SELECT userId FROM users WHERE email = ?))
-                 )`,
-					[imageUrl, tag, galleryId]
+					`INSERT INTO image_tags (imageId, tagId)
+					VALUES (
+						(SELECT imageId FROM images WHERE imageUrl = ?),
+						(SELECT tagId FROM tags WHERE name = ? AND galleryId = ? AND userId = (SELECT userId FROM users WHERE email = ?))
+					);
+`,
+					[imageUrl, tag, galleryId, email]
 				);
 			}
 		}
