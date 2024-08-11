@@ -36,9 +36,9 @@ export async function POST(req: NextRequest, { params }: PageProps) {
 
 	try {
 		const requestBody = await req.json();
-		const { imageId, tags } = requestBody as { imageId: number; tags: Tag[] };
+		const { tag } = requestBody as { tag: string };
 
-		if (!imageId || !tags) {
+		if (!tag) {
 			return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
 		}
 
@@ -46,25 +46,7 @@ export async function POST(req: NextRequest, { params }: PageProps) {
 
 		await connection.beginTransaction();
 
-		newTags = tags.filter((tag) => tag.id);
-
-		if (newTags.length > 0) {
-			const deleteQuery = `DELETE FROM image_tags WHERE imageId = ? AND tagId NOT IN (${newTags.map(() => '?').join(',')})`;
-			const deleteParams = [imageId, ...newTags.map((tag) => tag.id)];
-
-			await connection.query(deleteQuery, deleteParams);
-
-			const currentTags = await connection.query('SELECT tagId FROM image_tags WHERE imageId = ?', [imageId]);
-
-			for (const tag of newTags) {
-				const tagExists = (currentTags[0] as RowDataPacket[]).find((currentTag: RowDataPacket) => currentTag.tagId === tag.id);
-				if (!tagExists) {
-					await connection.query('INSERT IGNORE INTO image_tags (imageId, tagId) VALUES (?, ?)', [imageId, tag.id]);
-				}
-			}
-		} else {
-			await connection.query('DELETE FROM image_tags WHERE imageId = ?', [imageId]);
-		}
+		await connection.execute('INSERT INTO tags (userId, galleryId, name) VALUES ((SELECT userId FROM users WHERE email = ?), (SELECT galleryId FROM gallery WHERE publicId = ?), ?)', [session.user.email, params.galleryId, tag]);
 
 		await connection.commit();
 
