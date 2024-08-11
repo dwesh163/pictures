@@ -31,25 +31,18 @@ export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: bool
 	};
 
 	useEffect(() => {
-		console.log('Selected tags:', selectedTags);
-		console.log('Tags:', tags);
-		console.log(selectedTags.length);
 		if (selectedTags.length == 0) {
-			console.log('No tags, showing all images');
 			setShowAllImages(false);
 		}
 	}, [selectedTags]);
 
 	const filteredImages = gallery.images?.filter((image) => {
-		// If no tags are selected, return all images
 		if (selectedTags.length === 0) {
 			return true;
 		}
 
-		// Create a set of selected tag names for efficient look-up
 		const selectedTagNames = new Set(selectedTags.map((tag) => tag.name));
 
-		// Return true if any tag of the image is in the selected tags
 		return image.tags.some((imgTag: { name: string }) => selectedTagNames.has(imgTag.name));
 	});
 
@@ -122,9 +115,9 @@ export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: bool
 													setSelectedTags([tag]);
 													setShowAllImages(true);
 												}}>
-												<img src={`/api/image/?imageUrl=${tag.cover}`} alt={tag.name} className="w-full h-auto cursor-pointer" />
-												<div className="absolute bottom-0 w-full h-full flex justify-content items-center transform text-center bg-black opacity-70 text-white p-1 rounded">
-													<h3 className="text-xs lg:text-xl text-center w-full font-black">{tag.name}</h3>
+												<img src={`/api/image/?imageUrl=${tag.cover}`} alt={tag.name} className="w-full h-auto cursor-pointer bg-black opacity-30" />
+												<div className="absolute bottom-0 w-full h-full flex justify-content items-center transform text-center text-white p-1">
+													<h3 className="text-xl lg:text-xl text-center w-full font-black">{tag.name}</h3>
 												</div>
 											</div>
 										)
