@@ -33,21 +33,21 @@ export async function getGalleries(email: string): Promise<any> {
                 g.description,
                 g.createdAt,
                 g.updatedAt,
-				g.coverImages,
+				IFNULL(
+					g.coverImages,
+					(
+						SELECT JSON_ARRAYAGG(imageUrl)
+						FROM (
+							SELECT i.imageUrl
+							FROM images i
+							ORDER BY i.createdAt DESC
+							LIMIT 4
+						) AS recent_images
+					)
+				) AS coverImages,
                 g.publicId,
                 g.public,
                 g.published,
-                (
-                    SELECT GROUP_CONCAT(
-								JSON_OBJECT(
-										'imageId', i.imageId, 'userId', i.userId, 'imageUrl', i.imageUrl
-								)
-								ORDER BY i.createdAt DESC SEPARATOR ','
-						)
-					FROM images i
-							JOIN image_gallery ig ON i.imageId = ig.imageId
-					WHERE ig.galleryId = g.galleryId
-                ) AS images,
                 (
                     SELECT GROUP_CONCAT(
                                 JSON_OBJECT(
@@ -90,7 +90,6 @@ export async function getGallery(publicId: string, email: string): Promise<Galle
 		connection = await connectMySQL();
 		await connection.execute('SET SESSION group_concat_max_len = 100000000;');
 
-		// Récupérer les informations de la galerie
 		const galleryQuery = `
             SELECT
                 g.galleryId,
@@ -135,7 +134,6 @@ export async function getGallery(publicId: string, email: string): Promise<Galle
 
 		const gallery = galleryResults[0] as Gallery;
 
-		// Récupérer les images
 		const imagesQuery = `
             SELECT
                 i.imageId,
@@ -165,7 +163,17 @@ export async function getGallery(publicId: string, email: string): Promise<Galle
 					ELSE t.name
 				END AS name,
 				t.tagId AS id,
-				i.imageUrl AS cover  -- i.imageUrl will be NULL if coverId is NULL or doesn't match any imageId
+				COALESCE(
+					i.imageUrl,
+					(
+						SELECT i2.imageUrl
+						FROM images i2
+						JOIN image_tags it2 ON i2.imageId = it2.imageId
+						WHERE it2.tagId = t.tagId
+						ORDER BY i2.createdAt DESC
+						LIMIT 1
+					)
+				) AS cover
 			FROM tags t
 			LEFT JOIN users u ON t.userId = u.userId
 			LEFT JOIN images i ON t.coverId = i.imageId
@@ -183,7 +191,6 @@ export async function getGallery(publicId: string, email: string): Promise<Galle
 		gallery.tags = tags as Tag[];
 
 		const imageIds: number[] = imageResults.map((image: RowDataPacket) => image.imageId as number);
-		console.log('imageIds', imageIds);
 		if (imageIds.length != 0) {
 			const imageTagsQuery = `
 				SELECT
@@ -206,12 +213,10 @@ export async function getGallery(publicId: string, email: string): Promise<Galle
 
 			const [imageTagsResults]: [RowDataPacket[], FieldPacket[]] = await connection.execute(imageTagsQuery);
 
-			console.log('imageTagsResults', imageTagsResults);
-
 			const imageTagsMap: { [key: number]: Tag[] } = {};
 			for (const imageTag of imageTagsResults) {
 				const tag: Tag = {
-					id: imageTag.id,
+					id: imageTag.tagId,
 					name: imageTag.name,
 					cover: imageTag.cover,
 				};
@@ -220,6 +225,7 @@ export async function getGallery(publicId: string, email: string): Promise<Galle
 				}
 				imageTagsMap[imageTag.imageId].push(tag);
 			}
+
 			for (const image of imageResults) {
 				image.tags = imageTagsMap[image.imageId] || [];
 			}
