@@ -24,6 +24,7 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 	const [isImportDialogOpen, setIsImportDialogOpen] = useState(false);
 	const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
 	const [isTagDialogOpen, setIsTagDialogOpen] = useState(false);
+	const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 	const [gallery, setGallery] = useState<Gallery>(galleryData);
 	const [tags, setTags] = useState<Tag[]>(galleryData.tags ?? []);
 	const [importTags, setImportTags] = useState<Tag[]>([]);
@@ -172,6 +173,17 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 						<Button onClick={handleUpdateTag} className="w-full" type="button">
 							Update tags
 						</Button>
+					</DialogFooter>
+				</DialogContent>
+			</Dialog>
+			<Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+				<DialogContent className="w-[95%] sm:w-1/2">
+					<DialogHeader>
+						<DialogTitle>Are you sure you want to delete?</DialogTitle>
+						<DialogDescription>This action cannot be undone. This will permanently delete the selected picture from your gallery.</DialogDescription>
+					</DialogHeader>
+					<DialogFooter>
+						<Button className="bg-red-600 hover:bg-red-500 text-white">Confirm Delete</Button>
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
@@ -348,7 +360,10 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 													}}>
 													<LucideTag />
 												</Button>
-												<Button>
+												<Button
+													onClick={() => {
+														setIsDeleteDialogOpen(true);
+													}}>
 													<Trash2 />
 												</Button>
 											</div>
