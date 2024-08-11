@@ -115,10 +115,11 @@ export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: bool
 													setSelectedTags([tag]);
 													setShowAllImages(true);
 												}}>
-												<img src={`/api/image/?imageUrl=${tag.cover}`} alt={tag.name} className="w-full h-auto cursor-pointer bg-black opacity-30" />
+												<div className="absolute bottom-0 w-full h-full bg-black opacity-30"></div>
 												<div className="absolute bottom-0 w-full h-full flex justify-content items-center transform text-center text-white p-1">
 													<h3 className="text-xl lg:text-xl text-center w-full font-black">{tag.name}</h3>
 												</div>
+												<img src={`/api/image/?imageUrl=${tag.cover}`} alt={tag.name} className="w-full h-auto cursor-pointer" />
 											</div>
 										)
 							  )}
