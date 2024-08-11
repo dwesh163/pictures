@@ -33,16 +33,18 @@ export async function getGalleries(email: string): Promise<any> {
                 g.description,
                 g.createdAt,
                 g.updatedAt,
-				IFNULL(
+				COALESCE(
 					g.coverImages,
 					(
 						SELECT JSON_ARRAYAGG(imageUrl)
 						FROM (
 							SELECT i.imageUrl
 							FROM images i
+							LEFT JOIN image_gallery ig ON i.imageId = ig.imageId
+							WHERE ig.galleryId = g.galleryId
 							ORDER BY i.createdAt DESC
 							LIMIT 4
-						) AS recent_images
+						) AS limited_images
 					)
 				) AS coverImages,
                 g.publicId,
