@@ -140,6 +140,7 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 			if (!response.ok) {
 				throw new Error('Failed to update tags');
 			}
+			onGalleryUpdate();
 			setIsTagDialogOpen(false);
 		} catch (error) {
 			console.error('Error updating tags:', error);
@@ -157,7 +158,6 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 						<DialogTitle>Modify tags</DialogTitle>
 						<DialogDescription>Select tags</DialogDescription>
 					</DialogHeader>
-					{JSON.stringify(selectedTags)}
 					<Input placeholder="Search tags..." value={searchTags} onChange={(e) => setSearchTags(e.target.value)} />
 					<ScrollArea className="h-[29vh] w-full flex flex-wrap">
 						{filteredTags.map((tag, index) => (
