@@ -116,7 +116,7 @@ export const authOptions: AuthOptions = {
 				try {
 					const filePath = path.join(process.cwd(), 'mail/new.html');
 					htmlContent = fs.readFileSync(filePath, 'utf-8');
-					htmlContent = htmlContent.replaceAll('XXXXXXNEWXXXXXX', 'A new user has joined your gallery\n--------------------------\n\nName: ' + name + '\nEmail: ' + user.email + '\n\n--------------------------\n\nKooked');
+					htmlContent = htmlContent.replaceAll('XXXXXXNEWXXXXXX', user.email);
 				} catch (error) {
 					console.error('Error reading HTML file:', error);
 				}
