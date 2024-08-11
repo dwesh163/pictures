@@ -33,6 +33,7 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 	const [errors, setErrors] = useState<string[]>([]);
 	const [name, setName] = useState<string>(galleryData.galleryName ?? '');
 	const [description, setDescription] = useState<string>(galleryData.description ?? '');
+	const [selectedImageId, setSelectedImageId] = useState<number>(0);
 
 	const updateGallery = async (event: React.FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -131,16 +132,14 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 
 	const handleUpdateTag = async () => {
 		try {
-			const response = await fetch('/api/gallery/update-tags', {
+			const response = await fetch('/api/gallery/' + gallery.publicId + '/tags', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ galleryId: gallery.galleryId, tags: selectedTags }),
+				body: JSON.stringify({ imageId: selectedImageId, tags: selectedTags }),
 			});
 			if (!response.ok) {
 				throw new Error('Failed to update tags');
 			}
-			setTags((prevTags) => prevTags.map((tag) => (selectedTags.some((t) => t.name === tag.name) ? { ...tag, selected: true } : tag)));
-			setSelectedTags([]);
 			setIsTagDialogOpen(false);
 		} catch (error) {
 			console.error('Error updating tags:', error);
@@ -150,8 +149,6 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 	const users = gallery.accredited_users?.filter((user) => user.email !== userData.email) ?? [];
 	const filteredTags = tags.filter((tag) => tag.name.toLowerCase().includes(searchTags.toLowerCase()));
 
-	console.log('filteredTags', filteredTags);
-
 	return (
 		<div className="md:space-y-6 space-y-3 p-5 pb-8 md:p-10 md:pb-16">
 			<Dialog open={isTagDialogOpen} onOpenChange={setIsTagDialogOpen}>
@@ -160,6 +157,7 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 						<DialogTitle>Modify tags</DialogTitle>
 						<DialogDescription>Select tags</DialogDescription>
 					</DialogHeader>
+					{JSON.stringify(selectedTags)}
 					<Input placeholder="Search tags..." value={searchTags} onChange={(e) => setSearchTags(e.target.value)} />
 					<ScrollArea className="h-[29vh] w-full flex flex-wrap">
 						{filteredTags.map((tag, index) => (
@@ -357,6 +355,7 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 													onClick={() => {
 														setIsTagDialogOpen(true);
 														setSelectedTags(image.tags);
+														setSelectedImageId(image.imageId);
 													}}>
 													<LucideTag />
 												</Button>
