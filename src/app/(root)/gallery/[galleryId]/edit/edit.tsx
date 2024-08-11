@@ -132,10 +132,10 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 
 	const handleUpdateTag = async () => {
 		try {
-			const response = await fetch('/api/gallery/' + gallery.publicId + '/tags', {
+			const response = await fetch('/api/gallery/' + gallery.publicId + '/' + selectedImageId + '/tags', {
 				method: 'POST',
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify({ imageId: selectedImageId, tags: selectedTags }),
+				body: JSON.stringify({ tags: selectedTags }),
 			});
 			if (!response.ok) {
 				throw new Error('Failed to update tags');
