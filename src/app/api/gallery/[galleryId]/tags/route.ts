@@ -57,7 +57,7 @@ export async function POST(req: NextRequest, { params }: PageProps) {
 			const currentTags = await connection.query('SELECT tagId FROM image_tags WHERE imageId = ?', [imageId]);
 
 			for (const tag of newTags) {
-				const tagExists = currentTags[0].find((currentTag: RowDataPacket) => currentTag.tagId === tag.id);
+				const tagExists = (currentTags[0] as RowDataPacket[]).find((currentTag: RowDataPacket) => currentTag.tagId === tag.id);
 				if (!tagExists) {
 					await connection.query('INSERT IGNORE INTO image_tags (imageId, tagId) VALUES (?, ?)', [imageId, tag.id]);
 				}
