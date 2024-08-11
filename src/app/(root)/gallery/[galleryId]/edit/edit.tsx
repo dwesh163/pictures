@@ -153,7 +153,7 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 	return (
 		<div className="md:space-y-6 space-y-3 p-5 pb-8 md:p-10 md:pb-16">
 			<Dialog open={isTagDialogOpen} onOpenChange={setIsTagDialogOpen}>
-				<DialogContent className="w-[95%] sm:w-1/2">
+				<DialogContent className="w-[95%] sm:w-1/2" onOpenAutoFocus={(e) => e.preventDefault()}>
 					<DialogHeader>
 						<DialogTitle>Modify tags</DialogTitle>
 						<DialogDescription>Select tags</DialogDescription>
