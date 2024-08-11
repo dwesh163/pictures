@@ -137,9 +137,9 @@ export function GalleriesList({ userData, galleries }: { userData: UserData; gal
 							<Link href={`/gallery/${gallery.publicId}`} key={index} className="w-full sm:w-fit">
 								<Card className="w-full sm:w-96 lg:h-[27rem] h-[25rem] cursor-pointer">
 									{coverImages.length !== 0 ? (
-										<div className="grid grid-cols-2 h-[254px] rounded-t-lg overflow-hidden">
-											{coverImages.map((imageUrl: string, imageIndex: number) => (
-												<img src={`/api/image?imageUrl=${imageUrl}`} alt={`Loading`} width={300} height={200} className="object-cover aspect-[3/2]" key={imageIndex} />
+										<div className="grid grid-cols-2 gap-0 h-[225px] sm:h-[254px] rounded-t-lg overflow-hidden">
+											{coverImages.map((imageUrl: string, index: number) => (
+												<img src={`/api/image?imageUrl=${imageUrl}`} alt={`Image ${index + 1}`} key={index} className={`object-cover ${coverImages.length === 1 ? 'col-span-2' : 'w-full h-full'}`} />
 											))}
 										</div>
 									) : (
