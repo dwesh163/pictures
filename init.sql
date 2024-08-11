@@ -28,7 +28,7 @@ CREATE TABLE IF NOT EXISTS gallery (
     public BOOLEAN DEFAULT FALSE,
     published BOOLEAN DEFAULT FALSE,
     publicId VARCHAR(50),
-    coverImage JSON,
+    coverImages JSON,
     coverText VARCHAR(255),
     coverFont VARCHAR(150),
     PRIMARY KEY (galleryId),
@@ -176,3 +176,7 @@ values (
         'Owner',
         'Can view, edit, and manage'
     );
+
+ALTER TABLE gallery ADD COLUMN coverImages JSON;
+
+ALTER TABLE gallery DROP COLUMN coverImage;

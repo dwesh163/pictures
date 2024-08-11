@@ -33,7 +33,7 @@ export async function getGalleries(email: string): Promise<any> {
                 g.description,
                 g.createdAt,
                 g.updatedAt,
-				g.coverImage,
+				g.coverImages,
                 g.publicId,
                 g.public,
                 g.published,
@@ -109,7 +109,7 @@ export async function getGallery(publicId: string, email: string): Promise<Galle
                 g.publicId,
                 g.public,
                 g.published,
-                g.coverImage,
+                g.coverImages,
                 g.coverFont,
                 g.coverText
             FROM gallery g
@@ -355,10 +355,10 @@ export async function saveImage(imageUrl: string, email: string, galleryId: stri
 
 		await connection.execute(
 			`INSERT INTO image_tags (imageId, tagId) 
-             VALUES (
-                (SELECT imageId FROM images WHERE imageUrl = ?),
-                (SELECT tagId FROM tags WHERE name = ? AND galleryId = ? AND userId = (SELECT userId FROM users WHERE email = ?))
-            )`,
+			VALUES (
+				(SELECT imageId FROM images WHERE imageUrl = ?),
+				(SELECT tagId FROM tags WHERE name = 'user' AND galleryId = ? AND userId = (SELECT userId FROM users WHERE email = ?))
+			)`,
 			[imageUrl, galleryId, email]
 		);
 
