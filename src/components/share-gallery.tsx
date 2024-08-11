@@ -11,8 +11,6 @@ export function ShareGallery({ galleryId, setIsShareDialogOpen }: { galleryId: s
 	const [error, setError] = useState('');
 
 	async function sendInvitation() {
-		console.log(phoneNumber, email);
-
 		const response = await fetch(`/api/gallery/${galleryId}/share`, {
 			method: 'POST',
 			headers: { 'Content-Type': 'application/json' },

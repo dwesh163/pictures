@@ -184,8 +184,6 @@ export async function getGallery(publicId: string, email: string): Promise<Galle
 			);
 			`;
 
-		console.log('imageResults', imageResults);
-
 		const [tags]: [RowDataPacket[], FieldPacket[]] = await connection.execute(tagsQuery, [publicId]);
 
 		gallery.tags = tags as Tag[];

@@ -269,7 +269,6 @@ function Signup() {
 			});
 			const data = await response.json();
 			if (data.success) {
-				console.log('OTP Resent');
 				setCountdown(5 * 60);
 			} else {
 				setError(data.message);

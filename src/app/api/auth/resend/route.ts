@@ -27,8 +27,6 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 		return NextResponse.json({ message: 'Missing fields' }, { status: 400 });
 	}
 
-	console.log('email:', email, 'otpId:', otpId);
-
 	let connection;
 
 	try {

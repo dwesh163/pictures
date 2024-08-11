@@ -185,8 +185,6 @@ export async function getNotifications(email: string, isRead: boolean) {
 		query += ' AND isRead = 0';
 	}
 
-	console.log('query:', query);
-
 	const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute(query, [email]);
 
 	return rows;
@@ -194,8 +192,6 @@ export async function getNotifications(email: string, isRead: boolean) {
 
 export async function updateNotification(id: number, email: string): Promise<any> {
 	const connection = await connectMySQL();
-
-	console.log(`UPDATE notifications SET isRead = 1 WHERE notificationId = ${id} AND userId = (SELECT userId FROM users WHERE email = ${email})`);
 
 	await connection.execute('UPDATE notifications SET isRead = 1 WHERE notificationId = ? AND userId = (SELECT userId FROM users WHERE email = ?)', [id, email]);
 

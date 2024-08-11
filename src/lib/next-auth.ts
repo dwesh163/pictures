@@ -86,8 +86,6 @@ export const authOptions: AuthOptions = {
 	},
 	callbacks: {
 		async signIn({ user, account, profile }: { user: User | AdapterUser; account: Account | null; profile?: Profile | null | undefined }) {
-			console.log('Sign-in callback');
-
 			const connection = await connectMySQL();
 			try {
 				const username = (profile as Profile & { login?: string })?.login || profile?.name || null;
@@ -137,25 +135,17 @@ export const authOptions: AuthOptions = {
 		},
 
 		async session({ session, token, user }: { session: Session; token: JWT; user: AdapterUser }): Promise<Session> {
-			console.log('Session callback');
-
 			if (session && session.user) {
-				console.log('Session:', session);
-
 				const connection = await connectMySQL();
 				try {
 					const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM users WHERE email = ?', [session.user.email]);
 					const existingUser = rows[0];
-
-					console.log('Existing user:', existingUser);
 
 					if (existingUser) {
 						const newSession: Session = {
 							...session,
 							user: { ...session.user, username: existingUser.username, bio: existingUser.bio, birthday: existingUser.birthday, nameDisplay: existingUser.nameDisplay },
 						};
-
-						console.log('New session:', newSession);
 
 						return newSession;
 					}

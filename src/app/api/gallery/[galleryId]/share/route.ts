@@ -60,8 +60,6 @@ export async function POST(req: NextRequest, { params }: PageProps) {
 		const requestBody = await req.json();
 		const { email, phoneNumber } = requestBody as { email: string; phoneNumber: string };
 
-		console.log('email:', email, 'phoneNumber:', phoneNumber);
-
 		if (!email || !phoneNumber) {
 			return NextResponse.json({ error: 'Missing fields' }, { status: 400 });
 		}
@@ -73,8 +71,6 @@ export async function POST(req: NextRequest, { params }: PageProps) {
 		if (typeof email !== 'string' || typeof phoneNumber !== 'string') {
 			return NextResponse.json({ error: 'Invalid userId or accreditationId' }, { status: 400 });
 		}
-
-		console.log('email:', email, 'phoneNumber:', phoneNumber);
 
 		connection = await connectMySQL();
 

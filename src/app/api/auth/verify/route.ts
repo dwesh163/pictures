@@ -52,14 +52,10 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
 		await connection.execute('UPDATE users SET verified = 3 WHERE userId = ?', [user.userId]);
 		await connection.execute('DELETE FROM otp WHERE otpId = ?', [otpId]);
 
-		console.log('token:', token);
-
 		await connection.commit();
 
 		if (token) {
-			console.log('user.phoneNumber:', user.phoneNumber);
 			join = await userJoin(token, user.phoneNumber as string);
-			console.log('join:', join);
 		}
 
 		return NextResponse.json({ success: 'Verification successful', join }, { status: 200 });
