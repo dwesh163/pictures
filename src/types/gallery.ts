@@ -19,7 +19,7 @@ export type Gallery = {
 				imageUrl: string;
 		  }[]
 		| null;
-	coverImages: number[] | null;
+	coverImages: string[] | null;
 	accredited_users: { name: string; email: string; image: string; accreditationId: number }[] | null;
 	tags: Tag[];
 };

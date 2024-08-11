@@ -118,7 +118,7 @@ export function GalleriesList({ userData, galleries }: { userData: UserData; gal
 				<div className="mt-5 flex flex-wrap justify-center gap-4">
 					{galleries.map((gallery: Gallery, index: number) => {
 						let usernames = [];
-						let coverImages: number[] = [];
+						let coverImages: string[] = [];
 						let images = [];
 
 						if (gallery.accredited_users) {
@@ -133,26 +133,14 @@ export function GalleriesList({ userData, galleries }: { userData: UserData; gal
 							coverImages = gallery.coverImages;
 						}
 
-						if (gallery.images) {
-							try {
-								images = JSON.parse('[ ' + gallery.images + ' ]');
-							} catch (e) {
-								console.error('Error parsing gallery.images:', e);
-							}
-						}
-
 						return (
 							<Link href={`/gallery/${gallery.publicId}`} key={index} className="w-full sm:w-fit">
 								<Card className="w-full sm:w-96 lg:h-[27rem] h-[25rem] cursor-pointer">
-									{coverImages.length !== 0 && images.length !== 0 ? (
+									{coverImages.length !== 0 ? (
 										<div className="grid grid-cols-2 h-[254px] rounded-t-lg overflow-hidden">
-											{coverImages.map((imageId: number, imageIndex: number) => {
-												const image = images.find((img: { imageId: number }) => img.imageId === imageId);
-
-												if (!image) return null;
-
-												return <img src={`/api/image?imageUrl=${image.imageUrl}`} alt={`Loading`} width={300} height={200} className="object-cover aspect-[3/2]" key={imageIndex} />;
-											})}
+											{coverImages.map((imageUrl: string, imageIndex: number) => (
+												<img src={`/api/image?imageUrl=${imageUrl}`} alt={`Loading`} width={300} height={200} className="object-cover aspect-[3/2]" key={imageIndex} />
+											))}
 										</div>
 									) : (
 										<div className="h-[256px] rounded-t-lg flex items-center justify-center dark:bg-zinc-900 bg-zinc-200">
