@@ -47,7 +47,7 @@ export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: bool
 	});
 
 	return (
-		<div className="md:space-y-6 space-y-3 p-5 pb-8 md:p-10 md:pb-16">
+		<div className="md:space-y-6 space-y-3 p-5 pb-8 md:p-10 md:pb-16 ">
 			<div className="flex items-center justify-between">
 				<div className="space-y-0.5 w-full">
 					<h2 className="md:text-2xl text-xl font-bold tracking-tight">{gallery.galleryName}</h2>
@@ -62,7 +62,7 @@ export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: bool
 				)}
 			</div>
 
-			<div className="flex items-center gap-4">
+			<div className="flex items-center gap-4 flex-wrap">
 				{/* <div className="flex items-center gap-2">
 					<Checkbox
 						checked={!showAllImages && selectedTags.length === 0}
@@ -75,7 +75,7 @@ export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: bool
 					/>
 					<span>Tag</span>
 				</div> */}
-				<div className="flex items-center gap-2">
+				<div className="flex items-center gap-1.5 sm:gap-2">
 					<Checkbox
 						checked={tags.length === selectedTags.length}
 						onCheckedChange={(checked) => {
@@ -89,9 +89,9 @@ export function ViewPage({ gallery, canEdit }: { gallery: Gallery; canEdit: bool
 					<span>All</span>
 				</div>
 				{tags.map((tag, index) => (
-					<div className="flex items-center gap-2" key={index}>
+					<div className="flex items-center gap-1.5 sm:gap-2" key={index}>
 						<Checkbox checked={selectedTags.some((t) => t.name === tag.name)} onCheckedChange={(checked) => handleTagSelection(tag)} />
-						<span>{tag.name}</span>
+						<span className="sm:text-base text-sm">{tag.name}</span>
 					</div>
 				))}
 			</div>
