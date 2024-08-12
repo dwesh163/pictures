@@ -1,14 +1,23 @@
 import { getPublicGalleries } from '@/lib/galleries';
-import { MainList } from '@/components/main';
+import { MainGalleriesList } from '@/components/main-galleries-list';
+import { PublicGallery } from '@/types/gallery';
 
-export default async function SettingsProfilePage() {
-	const publicGalleries = await getPublicGalleries();
+async function fetchPublicGalleries(): Promise<PublicGallery[]> {
+	try {
+		const publicGalleries = await getPublicGalleries();
+		return publicGalleries || [];
+	} catch (error) {
+		console.error('Failed to fetch public galleries:', error);
+		return [];
+	}
+}
 
-	console.log(publicGalleries);
+export default async function MainPage() {
+	const publicGalleries = await fetchPublicGalleries();
 
 	return (
 		<div className="md:space-y-6 space-y-3 p-5 pb-8 md:p-10 md:pb-16">
-			<MainList galleries={publicGalleries} />
+			<MainGalleriesList galleries={publicGalleries} />
 		</div>
 	);
 }

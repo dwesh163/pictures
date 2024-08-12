@@ -5,7 +5,7 @@ import Masonry, { ResponsiveMasonry } from 'react-responsive-masonry';
 import { CameraOff } from 'lucide-react';
 import { useRouter } from 'next/navigation';
 
-export function MainList({ galleries }: { galleries: PublicGallery[] }) {
+export function MainGalleriesList({ galleries }: { galleries: PublicGallery[] }) {
 	const router = useRouter();
 	return (
 		<section>

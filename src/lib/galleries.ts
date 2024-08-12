@@ -37,7 +37,6 @@ export async function getPublicGalleries(): Promise<any> {
 							UNION ALL SELECT 1
 							UNION ALL SELECT 2
 							UNION ALL SELECT 3
-							-- Ajoutez plus d'UNION ALL si vous avez plus d'éléments
 						) AS indices
 						WHERE JSON_UNQUOTE(JSON_EXTRACT(g.coverImages, CONCAT('$[', idx, ']'))) IS NOT NULL
 					)
@@ -65,7 +64,7 @@ export async function getPublicGalleries(): Promise<any> {
 		);
 
 		if (!galleries.length) {
-			return [];
+			return null;
 		}
 
 		return galleries;
