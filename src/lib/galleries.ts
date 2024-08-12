@@ -95,17 +95,29 @@ export async function getGalleries(email: string): Promise<any> {
 				g.createdAt,
 				g.updatedAt,
 				COALESCE(
-					g.coverImages,
 					(
-						SELECT JSON_ARRAYAGG(imageUrl)
-						FROM (
-							SELECT i.imageUrl
-							FROM images i
-							LEFT JOIN image_gallery ig ON i.imageId = ig.imageId
-							WHERE ig.galleryId = g.galleryId
-							ORDER BY i.createdAt DESC
-							LIMIT 4
-						) AS limited_images
+						SELECT JSON_ARRAYAGG(i.imageUrl) AS imageUrls
+						FROM images i
+						WHERE i.imageId IN (
+							SELECT JSON_UNQUOTE(JSON_EXTRACT(g.coverImages, CONCAT('$[', idx, ']')))
+							FROM (
+								SELECT 0 AS idx
+								UNION ALL SELECT 1
+								UNION ALL SELECT 2
+								UNION ALL SELECT 3
+							) AS indices
+							WHERE JSON_UNQUOTE(JSON_EXTRACT(g.coverImages, CONCAT('$[', idx, ']'))) IS NOT NULL
+						)
+						ORDER BY i.createdAt DESC
+						LIMIT 4
+					),
+					(
+						SELECT JSON_ARRAYAGG(i.imageUrl)
+						FROM images i
+						JOIN image_gallery ig ON i.imageId = ig.imageId
+						WHERE ig.galleryId = g.galleryId
+						ORDER BY i.createdAt DESC
+						LIMIT 4
 					)
 				) AS coverImages,
 				g.publicId,
