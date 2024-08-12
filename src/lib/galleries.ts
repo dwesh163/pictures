@@ -115,12 +115,15 @@ export async function getGalleries(email: string): Promise<any> {
 						LIMIT 4
 					),
 					(
-						SELECT JSON_ARRAYAGG(i.imageUrl)
-						FROM images i
-						JOIN image_gallery ig ON i.imageId = ig.imageId
-						WHERE ig.galleryId = g.galleryId
-						ORDER BY i.createdAt DESC
-						LIMIT 4
+						SELECT JSON_ARRAYAGG(imageUrl)
+						FROM (
+							SELECT i.imageUrl
+							FROM images i
+							LEFT JOIN image_gallery ig ON i.imageId = ig.imageId
+							WHERE ig.galleryId = g.galleryId
+							ORDER BY i.createdAt DESC
+							LIMIT 4
+						) AS limited_images
 					)
 				) AS coverImages,
 				g.publicId,
