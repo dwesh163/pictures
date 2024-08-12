@@ -7,6 +7,8 @@ async function fetchPublicGalleries(): Promise<PublicGallery[]> {
 		const publicGalleries = await getPublicGalleries();
 		console.log(publicGalleries);
 
+		throw new Error('Test error' + publicGalleries);
+
 		return publicGalleries || [];
 	} catch (error) {
 		console.error('Failed to fetch public galleries:', error);
