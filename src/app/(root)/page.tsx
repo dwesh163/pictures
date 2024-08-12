@@ -5,6 +5,8 @@ import { PublicGallery } from '@/types/gallery';
 async function fetchPublicGalleries(): Promise<PublicGallery[]> {
 	try {
 		const publicGalleries = await getPublicGalleries();
+		console.log(publicGalleries);
+
 		return publicGalleries || [];
 	} catch (error) {
 		console.error('Failed to fetch public galleries:', error);
@@ -14,6 +16,8 @@ async function fetchPublicGalleries(): Promise<PublicGallery[]> {
 
 export default async function MainPage() {
 	const publicGalleries = await fetchPublicGalleries();
+
+	console.log(publicGalleries);
 
 	return (
 		<div className="md:space-y-6 space-y-3 p-5 pb-8 md:p-10 md:pb-16">
