@@ -6,9 +6,10 @@ export type Gallery = {
 	description: string | undefined | null;
 	createdAt: string | undefined | null;
 	updatedAt: string | undefined | null;
-	public: boolean | undefined | null;
-	published: boolean | undefined | null;
+	public: number;
+	published: number;
 	publicId: string;
+	edit: number | undefined | null;
 	coverText: string | undefined | null;
 	coverFont: string | undefined | null;
 	images:

@@ -3,7 +3,7 @@ import { AwaitedReactNode, JSXElementConstructor, ReactElement, ReactNode, React
 import { useRouter } from 'next/navigation';
 import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { CameraOff, Dot, Eye, Lock, Plus, UserRound, Ellipsis } from 'lucide-react';
+import { CameraOff, Dot, Eye, Lock, Plus, UserRound, Ellipsis, EyeOff, LockOpen } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -183,8 +183,8 @@ export function GalleriesList({ userData, galleries }: { userData: UserData; gal
 											</div>
 											<div className="text-end flex justify-end items-center">
 												<p className="text-muted-foreground flex gap-1 justify-end items-center">
-													<Lock className="w-4 h-4" />
-													<Eye className="w-4 h-4" />
+													{gallery.edit === 1 ? <LockOpen className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+													{gallery.public === 1 && gallery.published === 1 ? <Eye className="w-4 h-4" /> : <EyeOff className="w-4 h-4" />}
 												</p>
 											</div>
 										</div>

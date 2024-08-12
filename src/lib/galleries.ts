@@ -88,13 +88,13 @@ export async function getGalleries(email: string): Promise<any> {
 
 		const [galleries]: [RowDataPacket[], FieldPacket[]] = await connection.execute(
 			`
-            SELECT
-                g.galleryId,
-                g.userId,
-                g.name AS galleryName,
-                g.description,
-                g.createdAt,
-                g.updatedAt,
+			SELECT
+				g.galleryId,
+				g.userId,
+				g.name AS galleryName,
+				g.description,
+				g.createdAt,
+				g.updatedAt,
 				COALESCE(
 					g.coverImages,
 					(
@@ -109,28 +109,40 @@ export async function getGalleries(email: string): Promise<any> {
 						) AS limited_images
 					)
 				) AS coverImages,
-                g.publicId,
-                g.public,
-                g.published,
-                (
-                    SELECT GROUP_CONCAT(
-                                JSON_OBJECT(
-                                        'name', u.name,
-                                        'image', u.image
-                                ) ORDER BY gua2.accreditationId DESC SEPARATOR ','
-                        )
-                    FROM users u
-                            JOIN gallery_user_accreditations gua2 ON u.userId = gua2.userId
-                    WHERE gua2.galleryId = g.galleryId
-                    LIMIT 4
-                ) AS accredited_users
-            FROM gallery g
-                    LEFT JOIN gallery_user_accreditations gua ON g.galleryId = gua.galleryId
-            WHERE g.userId = ?
-            OR gua.userId = ?
-            GROUP BY g.galleryId;
+				g.publicId,
+				g.public,
+				g.published,
+				(
+					SELECT GROUP_CONCAT(
+							JSON_OBJECT(
+								'name', u.name,
+								'image', u.image
+							) ORDER BY gua2.accreditationId DESC SEPARATOR ','
+					)
+					FROM users u
+					JOIN gallery_user_accreditations gua2 ON u.userId = gua2.userId
+					WHERE gua2.galleryId = g.galleryId
+					LIMIT 4
+				) AS accredited_users,
+				CASE
+					WHEN g.userId = ? 
+						OR (
+							SELECT MAX(gua2.accreditationId)
+							FROM gallery_user_accreditations gua2
+							WHERE gua2.galleryId = g.galleryId
+							AND gua2.userId = ?
+						) >= 3 
+					THEN 1
+					ELSE 0
+				END AS edit
+			FROM gallery g
+			LEFT JOIN gallery_user_accreditations gua ON g.galleryId = gua.galleryId
+			WHERE g.userId = ?
+			OR gua.userId = ?
+			GROUP BY g.galleryId;
+
         `,
-			[userId, userId]
+			[userId, userId, userId, userId]
 		);
 
 		if (!galleries.length) {

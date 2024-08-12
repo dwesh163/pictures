@@ -48,6 +48,8 @@ export default async function SettingsProfilePage() {
 		galleries = [];
 	}
 
+	console.log(galleries);
+
 	return (
 		<div>
 			<GalleriesList userData={userData} galleries={galleries} />
