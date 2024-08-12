@@ -14,9 +14,9 @@ interface ViewPageProps {
 	};
 }
 
-async function fetchGallery(session: Session, galleryId: string) {
+async function fetchGallery(email: string, galleryId: string) {
 	try {
-		const gallery = await getGallery(galleryId, session.user.email ?? '');
+		const gallery = await getGallery(galleryId, email);
 		return gallery;
 	} catch (error) {
 		console.error('Failed to fetch gallery:', error);
@@ -27,25 +27,22 @@ async function fetchGallery(session: Session, galleryId: string) {
 export default async function GalleryEditPage({ params }: ViewPageProps) {
 	const session = await getServerSession();
 
-	if (!session) {
-		redirect('/auth/signin');
-	}
-
-	if (!(await CheckIfUserIsVerified(session.user.email as string))) {
-		redirect('/verified');
-	}
-
 	if (!params.galleryId) {
 		redirect('/me');
 	}
 
-	const gallery = await fetchGallery(session, params.galleryId);
+	let email = '';
+	if (session != null) {
+		email = session?.user?.email as string;
+	}
+
+	const gallery = await fetchGallery(email, params.galleryId);
 
 	if (!gallery) {
 		redirect('/me');
 	}
 
-	const canEdit = await canEditGallery(params.galleryId, session.user.email as string);
+	const canEdit = await canEditGallery(params.galleryId, email);
 
 	return (
 		<div>

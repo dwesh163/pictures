@@ -7,18 +7,19 @@ import path from 'path';
 export async function GET(req: NextRequest) {
 	const session = await getServerSession();
 
-	if (!session) {
-		return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-	}
-
 	const url = new URL(req.url);
 	const imageUrl = url.searchParams.get('imageUrl');
+	let email = '';
 
 	if (!imageUrl) {
 		return NextResponse.json({ error: 'Image URL is required' }, { status: 400 });
 	}
 
-	if (!(await checkImageAccess(imageUrl, session.user.email as string))) {
+	if (session != null) {
+		email = session?.user?.email as string;
+	}
+
+	if (!(await checkImageAccess(imageUrl, email))) {
 		return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 	}
 

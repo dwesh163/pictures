@@ -71,18 +71,35 @@ export async function checkImageAccess(imageId: string, email: string): Promise<
 	try {
 		connection = await connectMySQL();
 
+		console.log('Checking image access:', imageId, email);
+
 		const [rows]: [RowDataPacket[], FieldPacket[]] = await connection.execute(
 			`
-			SELECT *
-				FROM images i
-			LEFT JOIN image_gallery ig on i.imageId = ig.imageId
-			LEFT JOIN gallery_user_accreditations gua
-				ON gua.galleryId = ig.galleryId
+			SELECT 
+				i.imageId,
+				i.imageUrl,
+				i.userId
+			FROM 
+				images i
+			LEFT JOIN 
+				image_gallery ig ON i.imageId = ig.imageId
+			LEFT JOIN 
+				gallery g ON ig.galleryId = g.galleryId
+			LEFT JOIN 
+				gallery_user_accreditations gua
+				ON gua.galleryId = g.galleryId
 				AND gua.userId = (SELECT userId FROM users WHERE email = ?)
-			LEFT JOIN users u
-				ON i.userId = u.userId
-			WHERE i.imageUrl = ?
-			AND (gua.userId IS NOT NULL OR i.userId = (SELECT userId FROM users WHERE email = ?));
+			WHERE 
+				i.imageUrl = ?
+				AND (
+					gua.userId IS NOT NULL
+					OR i.userId = (SELECT userId FROM users WHERE email = ?)
+					OR (g.public = 1 AND g.published = 1)
+				)
+			GROUP BY 
+				i.imageId, i.imageUrl, i.userId
+			HAVING 
+				MAX(g.public) = 1 OR MAX(g.published) = 1;
             `,
 			[email, imageId, email]
 		);

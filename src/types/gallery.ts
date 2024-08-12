@@ -36,3 +36,12 @@ export type Tag = {
 	name: string;
 	cover: string;
 };
+
+export type PublicGallery = {
+	galleryName: string;
+	description: string;
+	publicId: string;
+	coverText: string;
+	coverFont: string;
+	coverImages: string[];
+};

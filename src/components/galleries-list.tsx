@@ -119,7 +119,6 @@ export function GalleriesList({ userData, galleries }: { userData: UserData; gal
 					{galleries.map((gallery: Gallery, index: number) => {
 						let usernames = [];
 						let coverImages: string[] = [];
-						let images = [];
 
 						if (gallery.accredited_users) {
 							try {

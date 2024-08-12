@@ -17,6 +17,68 @@ async function connectMySQL() {
 	}
 }
 
+export async function getPublicGalleries(): Promise<any> {
+	let connection;
+	try {
+		connection = await connectMySQL();
+
+		const [galleries]: [RowDataPacket[], FieldPacket[]] = await connection.execute(
+			`
+			SELECT
+			g.galleryId,
+			COALESCE(
+				(
+					SELECT JSON_ARRAYAGG(i.imageUrl) AS imageUrls
+					FROM images i
+					WHERE i.imageId IN (
+						SELECT JSON_UNQUOTE(JSON_EXTRACT(g.coverImages, CONCAT('$[', idx, ']')))
+						FROM (
+							SELECT 0 AS idx
+							UNION ALL SELECT 1
+							UNION ALL SELECT 2
+							UNION ALL SELECT 3
+							-- Ajoutez plus d'UNION ALL si vous avez plus d'éléments
+						) AS indices
+						WHERE JSON_UNQUOTE(JSON_EXTRACT(g.coverImages, CONCAT('$[', idx, ']'))) IS NOT NULL
+					)
+					ORDER BY i.createdAt DESC
+					LIMIT 4
+				),
+				(
+					SELECT JSON_ARRAYAGG(i.imageUrl)
+					FROM images i
+					JOIN image_gallery ig ON i.imageId = ig.imageId
+					WHERE ig.galleryId = g.galleryId
+					ORDER BY i.createdAt DESC
+					LIMIT 4
+				)
+			) AS coverImages,
+			g.coverFont,
+			g.coverText,
+			g.publicId,
+			g.public,
+			g.published
+		FROM gallery g
+		LEFT JOIN gallery_user_accreditations gua ON g.galleryId = gua.galleryId
+		WHERE g.published = 1 AND g.public = 1;
+        `
+		);
+
+		if (!galleries.length) {
+			return [];
+		}
+
+		return galleries;
+	} catch (error) {
+		console.error('Error getting gallery:', error);
+		throw error;
+	} finally {
+		if (connection) {
+			await connection.end();
+		}
+	}
+}
+
 export async function getGalleries(email: string): Promise<any> {
 	let connection;
 	try {
@@ -125,6 +187,7 @@ export async function getGallery(publicId: string, email: string): Promise<Galle
                         AND gua.userId = (SELECT userId FROM users WHERE email = ?)
                     )
                     OR g.userId = (SELECT userId FROM users WHERE email = ?)
+					OR (g.public = 1 AND g.published = 1)
                 );
         `;
 
