@@ -148,7 +148,7 @@ export async function getGalleries(email: string): Promise<any> {
 							FROM gallery_user_accreditations gua2
 							WHERE gua2.galleryId = g.galleryId
 							AND gua2.userId = ?
-						) >= 3 
+						) >= 4 
 					THEN 1
 					ELSE 0
 				END AS edit
