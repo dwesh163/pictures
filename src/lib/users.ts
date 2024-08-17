@@ -98,8 +98,6 @@ export async function checkImageAccess(imageId: string, email: string): Promise<
 				)
 			GROUP BY 
 				i.imageId, i.imageUrl, i.userId
-			HAVING 
-				MAX(g.public) = 1 OR MAX(g.published) = 1;
             `,
 			[email, imageId, email]
 		);
