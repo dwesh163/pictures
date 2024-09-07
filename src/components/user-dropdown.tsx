@@ -46,12 +46,12 @@ export function UserDropdown() {
 
 				<DropdownMenuSeparator />
 
-				<DropdownMenuItem disabled={session === null} asChild>
+				{/* <DropdownMenuItem disabled={session === null} asChild>
 					<Link href="/me">
 						<User2 size={16} className="mr-2" />
 						My Profile
 					</Link>
-				</DropdownMenuItem>
+				</DropdownMenuItem> */}
 
 				<DropdownMenuItem asChild>
 					<Link href="/settings">
