@@ -147,6 +147,19 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 		}
 	};
 
+	const handleDelete = async () => {
+		try {
+			const response = await fetch('/api/gallery/' + gallery.publicId + '/' + selectedImageId, { method: 'POST' });
+			if (!response.ok) {
+				throw new Error('Failed to delete image');
+			}
+			onGalleryUpdate();
+			setIsDeleteDialogOpen(false);
+		} catch (error) {
+			console.error('Error deleting image:', error);
+		}
+	};
+
 	const users = gallery.accredited_users?.filter((user) => user.email !== userData.email) ?? [];
 	const filteredTags = tags.filter((tag) => tag.name.toLowerCase().includes(searchTags.toLowerCase()));
 
@@ -181,7 +194,9 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 						<DialogDescription>This action cannot be undone. This will permanently delete the selected picture from your gallery.</DialogDescription>
 					</DialogHeader>
 					<DialogFooter>
-						<Button className="bg-red-600 hover:bg-red-500 text-white">Confirm Delete</Button>
+						<Button className="bg-red-600 hover:bg-red-500 text-white" onClick={() => handleDelete()}>
+							Confirm Delete
+						</Button>
 					</DialogFooter>
 				</DialogContent>
 			</Dialog>
@@ -362,6 +377,7 @@ export function EditPage({ galleryData, userData }: { galleryData: Gallery; user
 												<Button
 													onClick={() => {
 														setIsDeleteDialogOpen(true);
+														setSelectedImageId(image.imageId);
 													}}>
 													<Trash2 />
 												</Button>
