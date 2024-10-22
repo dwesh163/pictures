@@ -74,13 +74,13 @@ export async function POST(req: NextRequest, { params }: PageProps) {
 
 		connection = await connectMySQL();
 
-		const [shareCountRows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT COUNT(*) as count FROM join_gallery_requests WHERE galleryId = (SELECT galleryId FROM gallery WHERE public = ?) AND email = ?', [params.galleryId, email]);
+		const [shareCountRows]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT COUNT(*) as count FROM join_gallery_requests WHERE galleryId = (SELECT galleryId FROM gallery WHERE publicId = ?) AND email = ?', [params.galleryId, email]);
 
 		if ((shareCountRows as any[])[0].count > 0) {
 			return NextResponse.json({ message: 'Already shared' }, { status: 400 });
 		}
 
-		const [access]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM gallery_user_accreditations WHERE galleryId = (SELECT galleryId FROM gallery WHERE public = ?) AND userId = (SELECT userId FROM users WHERE email = ?)', [params.galleryId, email]);
+		const [access]: [RowDataPacket[], FieldPacket[]] = await connection.execute('SELECT * FROM gallery_user_accreditations WHERE galleryId = (SELECT galleryId FROM gallery WHERE publicId = ?) AND userId = (SELECT userId FROM users WHERE email = ?)', [params.galleryId, email]);
 
 		if (access.length != 0) {
 			return NextResponse.json({ message: 'Already shared' }, { status: 400 });
